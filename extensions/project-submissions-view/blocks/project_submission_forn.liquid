@@ -1,0 +1,1299 @@
+{% assign avg_rating = block.settings.product.metafields.demo.avg_rating.value | round %}
+
+<style>
+.form-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 5rem 3rem;
+}
+
+.form-wrapper {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.progress-container {
+  margin-bottom: 4rem;
+}
+
+.progress-bar {
+  height: 1rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #4f46e5;
+  transition: width 0.5s ease;
+}
+
+.form-card {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 1.5rem;
+  padding: 3.5rem;
+}
+
+.step {
+  display: none;
+}
+
+.step.active {
+  display: block;
+}
+
+.step-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 2rem;
+}
+
+.step-description {
+  font-size: 1.75rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 2.5rem;
+}
+
+.form-group {
+  margin-bottom: 2.5rem;
+}
+
+.form-group.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 1.5rem;
+  font-size: 1.75rem;
+  line-height: 1.6;
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  min-height: 5rem;
+}
+
+.form-input:focus {
+  border-color: var(--primary-color, #4f46e5);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb, 79, 70, 229), 0.1);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  gap: 1.5rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button-primary {
+  background-color: var(--primary-color, #4f46e5);
+  color: white;
+  padding: 1.25rem 2.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.button-primary:hover {
+  background-color: var(--primary-color-dark, #4338ca);
+  transform: translateY(-1px);
+}
+
+.button-secondary {
+  background-color: var(--secondary-color, #e5e7eb);
+  color: var(--secondary-text-color, #374151);
+  padding: 1.25rem 2.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.button-secondary:hover {
+  background-color: var(--secondary-color-dark, #d1d5db);
+  transform: translateY(-1px);
+}
+
+.file-upload {
+  min-height: 20rem;
+  padding: 4rem;
+  border: 4px dashed var(--primary-color, #4f46e5);
+  border-radius: 1.5rem;
+  background-color: rgba(var(--primary-color-rgb, 79, 70, 229), 0.05);
+  transition: all 0.2s ease;
+}
+
+.file-upload:hover {
+  background-color: rgba(var(--primary-color-rgb, 79, 70, 229), 0.1);
+}
+
+.file-upload-content {
+  text-align: center;
+}
+
+.file-upload-icon {
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 2rem;
+}
+
+.file-upload-text {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.file-upload-label {
+  color: #4f46e5;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.file-upload-label:hover {
+  color: #4338ca;
+}
+
+.file-upload-input {
+  display: none;
+}
+
+.file-upload-hint {
+  font-size: 1.5rem;
+}
+
+.product-results {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.product-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.product-item:hover {
+  background-color: #f5f5f5;
+}
+
+.variant-option {
+  margin-bottom: 10px;
+}
+
+.variant-option label {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.variant-option select {
+  font-size: 1.75rem;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+}
+
+.error-message {
+  font-size: 1.75rem;
+  padding: 1.5rem;
+  background-color: #fee2e2;
+  border-radius: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.product-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  color: #4b5563;
+}
+
+.product-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-title a:hover {
+  text-decoration: underline;
+}
+
+.error-message small {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Larger Text Areas */
+textarea.form-input {
+  min-height: 12rem;
+  font-size: 1.75rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* Larger Select Boxes */
+select.form-input {
+  font-size: 1.75rem;
+  padding: 1.5rem 3.5rem 1.5rem 1.5rem;
+  background-size: 2.5rem;
+  background-position: right 1.5rem center;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 5rem;
+  height: 5rem;
+  border-width: 5px;
+}
+
+/* Product Search Input */
+#product-search {
+  font-size: 1.75rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
+
+/* Progress Bar */
+.progress-container {
+  margin-bottom: 4rem;
+}
+
+.progress-bar {
+  height: 1rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+/* Form Container */
+.form-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 5rem 3rem;
+}
+
+.form-wrapper {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.form-card {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 1.5rem;
+  padding: 3.5rem;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 2.5rem;
+}
+
+.form-group.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+/* Button Groups */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  gap: 1.5rem;
+}
+
+/* File Upload Area */
+.file-upload {
+  min-height: 20rem;
+  padding: 4rem;
+  border: 4px dashed var(--primary-color, #4f46e5);
+  border-radius: 1.5rem;
+  background-color: rgba(var(--primary-color-rgb, 79, 70, 229), 0.05);
+  transition: all 0.2s ease;
+}
+
+.file-upload-icon {
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 2rem;
+}
+
+/* Product Search Section */
+.product-search-container {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+
+.product-search-input {
+  position: relative;
+  width: 100%;
+}
+
+.product-search-input input {
+  width: 100%;
+  padding: 1.5rem 1.5rem 1.5rem 4.5rem;
+  font-size: 1.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 1rem;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.product-search-input input:focus {
+  border-color: var(--primary-color, #4f46e5);
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb, 79, 70, 229), 0.1);
+  outline: none;
+}
+
+.product-search-icon {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.product-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 500px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 0.5rem;
+  z-index: 10;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-item:hover {
+  background-color: #f9fafb;
+}
+
+.product-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-right: 1.5rem;
+}
+
+.product-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  color: #4b5563;
+}
+
+.product-variants {
+  font-size: 1.25rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.loading-spinner::after {
+  content: "";
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e5e7eb;
+  border-top-color: var(--primary-color, #4f46e5);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.no-results {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 1.5rem;
+}
+
+/* Variant Selection */
+.variant-selection {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.variant-option {
+  margin-bottom: 1.5rem;
+}
+
+.variant-option:last-child {
+  margin-bottom: 0;
+}
+
+.variant-option label {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+.variant-option select {
+  width: 100%;
+  padding: 1.25rem;
+  font-size: 1.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  background-color: white;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.5rem center;
+  background-size: 2rem;
+  padding-right: 3.5rem;
+}
+
+.variant-option select:focus {
+  border-color: var(--primary-color, #4f46e5);
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb, 79, 70, 229), 0.1);
+  outline: none;
+}
+
+.selected-product {
+  background: #f9fafb;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.selected-product-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-right: 2rem;
+}
+
+.selected-product-details {
+  flex: 1;
+}
+
+.selected-product-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.selected-product-variant {
+  font-size: 1.5rem;
+  color: #4b5563;
+}
+
+.error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1) !important;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #fee2e2;
+  border-radius: 0.5rem;
+}
+
+.success-message {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.success-message h2 {
+  font-size: 2.5rem;
+  color: #10b981;
+  margin-bottom: 1.5rem;
+}
+
+.success-message p {
+  font-size: 1.75rem;
+  color: #4b5563;
+}
+</style>
+
+<div class="form-container">
+  <div class="form-wrapper">
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Form Steps -->
+    <div class="form-card">
+      <!-- Step 1 -->
+      <div class="step active" data-step="1">
+        <h2 class="step-title">Step 1: We want to see your project!</h2>
+        <p class="step-description">Show off your knit or crochet project using Bad Sheep Yarn. We would love to share your work on our website, social media, newsletter and more! Just upload images of your project and answer some quick questions.</p>
+        <div class="button-group">
+          <div></div>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step" data-step="2">
+        <h2 class="step-title">Step 2: Your Name</h2>
+        <p class="step-description">This info will not be shared unless you would like us to credit you in the photo</p>
+        <div class="form-group grid">
+          <div>
+            <label class="form-label">First Name*</label>
+            <input type="text" required class="form-input">
+          </div>
+          <div>
+            <label class="form-label">Last Name*</label>
+            <input type="text" required class="form-input">
+          </div>
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step" data-step="3">
+        <h2 class="step-title">Step 3: Contact Information</h2>
+        <p class="step-description">Your email will not be shared, we only need it in case we need to contact you directly regarding your submission.</p>
+        <div class="form-group">
+          <label class="form-label">Email*</label>
+          <input type="email" required class="form-input">
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step" data-step="4">
+        <h2 class="step-title">Step 4: Project Details</h2>
+        <div class="form-group">
+          <label class="form-label">Project Name*</label>
+          <input type="text" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pattern Name</label>
+          <input type="text" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Designer Name</label>
+          <input type="text" class="form-input">
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step" data-step="5">
+        <h2 class="step-title">Step 5: Pattern Link</h2>
+        <div class="form-group">
+          <label class="form-label">Pattern Link</label>
+          <input type="url" class="form-input">
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step" data-step="6">
+        <h2 class="step-title">Step 6: Select Product</h2>
+        <p class="step-description">Search for the Bad Sheep Yarn product you used in your project. You can search by product name, color, or type.</p>
+        
+        <div class="product-search-container">
+          <div class="product-search-input">
+            <svg class="product-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input 
+              type="text" 
+              id="product-search" 
+              placeholder="Search for products..."
+              oninput="searchProducts(this.value)"
+            >
+          </div>
+          <div id="product-results" class="product-results"></div>
+        </div>
+
+        <div id="selected-product-display" class="selected-product" style="display: none;">
+          <img id="selected-product-image" class="selected-product-image" src="" alt="">
+          <div class="selected-product-details">
+            <div id="selected-product-title" class="selected-product-title"></div>
+            <div id="selected-product-variant" class="selected-product-variant"></div>
+          </div>
+        </div>
+
+        <div id="variant-selection" class="variant-selection" style="display: none;">
+          <h3 class="step-title" style="font-size: 2rem; margin-bottom: 1.5rem;">Select Variant</h3>
+          <div id="variant-options"></div>
+        </div>
+
+        <input type="hidden" id="selected-product-id" name="product_id">
+        <input type="hidden" id="selected-variant-id" name="variant_id">
+
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 7 -->
+      <div class="step" data-step="7">
+        <h2 class="step-title">Step 7: Name Display</h2>
+        <div class="form-group">
+          <label class="form-label">How would you like us to display your name?*</label>
+          <select required class="form-input">
+            <option value="full">Full Name</option>
+            <option value="first">First Name Only</option>
+            <option value="initials">Initials</option>
+            <option value="anonymous">Anonymous</option>
+          </select>
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 8 -->
+      <div class="step" data-step="8">
+        <h2 class="step-title">Step 8: Social Media</h2>
+        <div class="form-group">
+          <label class="form-label">Social Media Handle</label>
+          <input type="text" class="form-input" placeholder="@username">
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary next-step">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 9 -->
+      <div class="step" data-step="9">
+        <h2 class="step-title">Step 9: Project Images</h2>
+        <div class="form-group">
+          <label class="form-label">Upload Project Images*</label>
+          <div class="file-upload">
+            <div class="file-upload-content">
+              <svg class="file-upload-icon" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <div class="file-upload-text">
+                <label for="file-upload" class="file-upload-label">
+                  <span>Upload files</span>
+                  <input id="file-upload" name="file-upload" type="file" class="file-upload-input" multiple>
+                </label>
+                <p>or drag and drop</p>
+              </div>
+              <p class="file-upload-hint">PNG, JPG, GIF up to 10MB</p>
+            </div>
+          </div>
+        </div>
+        <div class="button-group">
+          <button class="button button-secondary prev-step">Previous</button>
+          <button class="button button-primary submit">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedProduct = null;
+let selectedVariants = {};
+let isLoading = false;
+let storeDomain = window.Shopify.shop;
+console.log(storeDomain);
+let API_PATH = 'https://street-monaco-premier-ferry.trycloudflare.com';
+
+
+function searchProducts(query) {
+  if (query.length < 2) {
+    document.getElementById('product-results').innerHTML = '';
+    return;
+  }
+
+  isLoading = true;
+  const resultsDiv = document.getElementById('product-results');
+  resultsDiv.innerHTML = '<div class="loading-spinner"></div>';
+  query.shop = storeDomain;
+
+  fetch(`${API_PATH}/api/products?query=${encodeURIComponent(query)}`)
+    .then(response => response.json())
+    .then(data => {
+      isLoading = false;
+      resultsDiv.innerHTML = '';
+
+      if (data.error) {
+        resultsDiv.innerHTML = `
+          <div class="error-message">
+            ${data.error}
+            ${data.details ? `<br><small>${data.details}</small>` : ''}
+          </div>
+        `;
+        return;
+      }
+
+      if (data.products.length === 0) {
+        resultsDiv.innerHTML = '<div class="no-results">No products found</div>';
+        return;
+      }
+
+      storeDomain = data.domain;
+
+      data.products.forEach(product => {
+        const div = document.createElement('div');
+        div.className = 'product-item';
+        
+        const details = document.createElement('div');
+        details.className = 'product-details';
+        
+        if (product.image) {
+          const img = document.createElement('img');
+          img.className = 'product-image';
+          img.src = product.image;
+          img.alt = product.imageAlt || product.title;
+          div.appendChild(img);
+        }
+        
+        const info = document.createElement('div');
+        info.className = 'product-info';
+        
+        const title = document.createElement('div');
+        title.className = 'product-title';
+        title.textContent = product.title;
+        info.appendChild(title);
+        
+        const priceDiv = document.createElement('div');
+        priceDiv.className = 'product-price';
+        priceDiv.textContent = `$${product.price}`;
+        if (product.compareAtPrice) {
+          const comparePrice = document.createElement('span');
+          comparePrice.className = 'compare-price';
+          comparePrice.textContent = `$${product.compareAtPrice}`;
+          priceDiv.appendChild(comparePrice);
+        }
+        info.appendChild(priceDiv);
+        
+        const options = document.createElement('div');
+        options.className = 'product-options';
+        options.textContent = `${product.options.length} options available`;
+        info.appendChild(options);
+        
+        div.appendChild(info);
+        div.onclick = () => selectProduct(product);
+        resultsDiv.appendChild(div);
+      });
+    })
+    .catch(error => {
+      isLoading = false;
+      console.error('Error searching products:', error);
+      resultsDiv.innerHTML = `
+        <div class="error-message">
+          Error searching products. Please try again.
+          <br><small>${error.message}</small>
+        </div>
+      `;
+    });
+}
+
+function selectProduct(product) {
+  selectedProduct = product;
+  document.getElementById('selected-product-id').value = product.id;
+  document.getElementById('product-results').innerHTML = '';
+  document.getElementById('product-search').value = product.title;
+  
+  // Update selected product display
+  const selectedDisplay = document.getElementById('selected-product-display');
+  const selectedImage = document.getElementById('selected-product-image');
+  const selectedTitle = document.getElementById('selected-product-title');
+  const selectedPrice = document.getElementById('selected-product-variant');
+  
+  selectedImage.src = product.image || '/assets/no-image.png';
+  selectedImage.alt = product.imageAlt || product.title;
+  selectedTitle.textContent = product.title;
+  selectedPrice.textContent = `$${product.price}`;
+  selectedDisplay.style.display = 'flex';
+  
+  // Show option selection
+  const optionSelection = document.getElementById('variant-selection');
+  optionSelection.style.display = 'block';
+  
+  // Clear previous option selections
+  const optionOptions = document.getElementById('variant-options');
+  optionOptions.innerHTML = '';
+  
+  // Create select elements for each option
+  product.options.forEach(option => {
+    const div = document.createElement('div');
+    div.className = 'variant-option';
+    
+    const label = document.createElement('label');
+    label.textContent = option.name;
+    div.appendChild(label);
+    
+    const select = document.createElement('select');
+    select.dataset.optionName = option.name;
+    select.onchange = () => updateOptionSelection(option.name, select.value);
+    
+    // Add options to select
+    option.values.forEach(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      select.appendChild(option);
+    });
+    
+    div.appendChild(select);
+    optionOptions.appendChild(div);
+  });
+}
+
+function updateOptionSelection(optionName, value) {
+  selectedVariants[optionName] = value;
+  
+  // Update the selected variant display
+  const variantDisplay = document.getElementById('selected-product-variant');
+  const selectedOptions = Object.entries(selectedVariants)
+    .map(([name, value]) => `${name}: ${value}`)
+    .join(', ');
+  variantDisplay.textContent = selectedOptions;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const steps = document.querySelectorAll('.step');
+  const progressBar = document.querySelector('.progress-fill');
+  let currentStep = 1;
+
+  function updateProgress() {
+    const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
+    progressBar.style.width = `${progress}%`;
+  }
+
+  function validateCurrentStep() {
+    const currentStepElement = steps[currentStep - 1];
+    const requiredFields = currentStepElement.querySelectorAll('[required]');
+    let isValid = true;
+    let firstInvalidField = null;
+
+    // Check required fields
+    requiredFields.forEach(field => {
+      if (!field.value.trim()) {
+        isValid = false;
+        if (!firstInvalidField) firstInvalidField = field;
+        field.classList.add('error');
+      } else {
+        field.classList.remove('error');
+      }
+    });
+
+    // Special validation for email field
+    const emailField = currentStepElement.querySelector('input[type="email"]');
+    if (emailField && emailField.value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailField.value)) {
+        isValid = false;
+        if (!firstInvalidField) firstInvalidField = emailField;
+        emailField.classList.add('error');
+      }
+    }
+
+    // Special validation for product selection in step 6
+    if (currentStep === 6 && !selectedProduct) {
+      isValid = false;
+      const productSearch = document.getElementById('product-search');
+      if (!firstInvalidField) firstInvalidField = productSearch;
+      productSearch.classList.add('error');
+    }
+
+    // Special validation for file upload in step 9
+    if (currentStep === 9) {
+      const fileInput = document.getElementById('file-upload');
+      if (fileInput && fileInput.files.length === 0) {
+        isValid = false;
+        const fileUpload = document.querySelector('.file-upload');
+        fileUpload.classList.add('error');
+        if (!firstInvalidField) firstInvalidField = fileInput;
+      }
+    }
+
+    if (!isValid && firstInvalidField) {
+      firstInvalidField.focus();
+      // Show error message
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'error-message';
+      errorMessage.textContent = 'Please fill in all required fields correctly.';
+      const existingError = currentStepElement.querySelector('.error-message');
+      if (existingError) {
+        existingError.remove();
+      }
+      currentStepElement.insertBefore(errorMessage, currentStepElement.firstChild);
+      return false;
+    }
+
+    return true;
+  }
+
+  function showStep(stepNumber) {
+    steps.forEach(step => {
+      step.classList.remove('active');
+    });
+    steps[stepNumber - 1].classList.add('active');
+    currentStep = stepNumber;
+    updateProgress();
+  }
+
+  document.querySelectorAll('.next-step').forEach(button => {
+    button.addEventListener('click', () => {
+      if (currentStep < steps.length && validateCurrentStep()) {
+        showStep(currentStep + 1);
+      }
+    });
+  });
+
+  document.querySelectorAll('.prev-step').forEach(button => {
+    button.addEventListener('click', () => {
+      if (currentStep > 1) {
+        showStep(currentStep - 1);
+      }
+    });
+  });
+
+  // Initialize first step
+  showStep(1);
+
+  // Add input validation listeners
+  const inputs = document.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      this.classList.remove('error');
+      const errorMessage = this.closest('.step').querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+    });
+  });
+
+  // Add file input validation
+  const fileInput = document.getElementById('file-upload');
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      const fileUpload = document.querySelector('.file-upload');
+      fileUpload.classList.remove('error');
+      const errorMessage = fileUpload.closest('.step').querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+    });
+  }
+
+  // Add dynamic color functionality
+  function setThemeColors(primaryColor, secondaryColor) {
+    // Convert hex to RGB
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+
+    // Set primary color
+    document.documentElement.style.setProperty('--primary-color', primaryColor);
+    const primaryRgb = hexToRgb(primaryColor);
+    document.documentElement.style.setProperty('--primary-color-rgb', `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`);
+    
+    // Calculate darker shade for hover
+    const primaryDark = shadeColor(primaryColor, -20);
+    document.documentElement.style.setProperty('--primary-color-dark', primaryDark);
+
+    // Set secondary color
+    document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+    const secondaryRgb = hexToRgb(secondaryColor);
+    document.documentElement.style.setProperty('--secondary-color-rgb', `${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}`);
+    
+    // Calculate darker shade for hover
+    const secondaryDark = shadeColor(secondaryColor, -20);
+    document.documentElement.style.setProperty('--secondary-color-dark', secondaryDark);
+  }
+
+  // Helper function to lighten/darken colors
+  function shadeColor(color, percent) {
+    let R = parseInt(color.substring(1,3),16);
+    let G = parseInt(color.substring(3,5),16);
+    let B = parseInt(color.substring(5,7),16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;  
+    G = (G<255)?G:255;  
+    B = (B<255)?B:255;  
+
+    R = Math.max(0,R).toString(16).padStart(2, '0');
+    G = Math.max(0,G).toString(16).padStart(2, '0');
+    B = Math.max(0,B).toString(16).padStart(2, '0');
+
+    return `#${R}${G}${B}`;
+  }
+
+  // Initialize theme colors from settings
+  const primaryColor = '{{ block.settings.primary_color | default: "#4f46e5" }}';
+  const secondaryColor = '{{ block.settings.secondary_color | default: "#e5e7eb" }}';
+  setThemeColors(primaryColor, secondaryColor);
+
+  // Add form submission handler
+  const form = document.querySelector('.form-card');
+  form.addEventListener('submit', handleSubmit);
+});
+
+// Form validation function
+function validateForm() {
+  const requiredFields = document.querySelectorAll('[required]');
+  let isValid = true;
+  let firstInvalidField = null;
+
+  requiredFields.forEach(field => {
+    if (!field.value.trim()) {
+      isValid = false;
+      if (!firstInvalidField) firstInvalidField = field;
+      field.classList.add('error');
+    } else {
+      field.classList.remove('error');
+    }
+  });
+
+  // Validate email format
+  const emailField = document.querySelector('input[type="email"]');
+  if (emailField && emailField.value) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailField.value)) {
+      isValid = false;
+      if (!firstInvalidField) firstInvalidField = emailField;
+      emailField.classList.add('error');
+    }
+  }
+
+  // Validate product selection
+  if (!selectedProduct) {
+    isValid = false;
+    const productSearch = document.getElementById('product-search');
+    if (!firstInvalidField) firstInvalidField = productSearch;
+    productSearch.classList.add('error');
+  }
+
+  if (!isValid && firstInvalidField) {
+    firstInvalidField.focus();
+    return false;
+  }
+
+  return true;
+}
+
+// Prepare form data for API submission
+function prepareFormData() {
+  const formData = {
+    firstName: document.querySelector('input[placeholder="First Name"]').value,
+    lastName: document.querySelector('input[placeholder="Last Name"]').value,
+    email: document.querySelector('input[type="email"]').value,
+    projectName: document.querySelector('input[placeholder="Project Name"]').value,
+    patternName: document.querySelector('input[placeholder="Pattern Name"]').value,
+    designerName: document.querySelector('input[placeholder="Designer Name"]').value,
+    patternLink: document.querySelector('input[type="url"]').value,
+    product: {
+      id: selectedProduct.id,
+      title: selectedProduct.title,
+      options: selectedVariants
+    },
+    nameDisplay: document.querySelector('select[required]').value,
+    socialMedia: document.querySelector('input[placeholder="@username"]').value,
+    images: [] // Will be populated with uploaded images
+  };
+
+  return formData;
+}
+
+// Handle form submission
+async function handleSubmit(event) {
+  event.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
+
+  const formData = prepareFormData();
+  
+  // Log the full payload
+  console.group('Form Submission Payload');
+  console.log('Full Form Data:', formData);
+  console.log('Selected Product:', selectedProduct);
+  console.log('Selected Variants:', selectedVariants);
+  console.log('Store Domain:', storeDomain);
+  console.log('API Path:', API_PATH);
+  console.groupEnd();
+
+  const submitButton = event.target.querySelector('.submit');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Submitting...';
+
+  try {
+    // Log the request details
+    console.group('API Request Details');
+    console.log('Request URL:', `${API_PATH}/api/submissions`);
+    console.log('Request Headers:', {
+      'Content-Type': 'application/json',
+      'X-Shopify-Shop-Domain': storeDomain
+    });
+    console.log('Request Body:', formData);
+    console.groupEnd();
+
+    const response = await fetch(`${API_PATH}/api/submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Shop-Domain': storeDomain
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+
+    // Log the response
+    console.group('API Response');
+    console.log('Status:', response.status);
+    console.log('Response:', result);
+    console.groupEnd();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to submit form');
+    }
+
+    // Show success message
+    const formCard = document.querySelector('.form-card');
+    formCard.innerHTML = `
+      <div class="success-message">
+        <h2>Thank You!</h2>
+        <p>Your submission has been received. We'll review it and get back to you soon.</p>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Submission error:', error);
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'error-message';
+    errorMessage.textContent = `Error submitting form: ${error.message}`;
+    document.querySelector('.form-card').prepend(errorMessage);
+    submitButton.disabled = false;
+    submitButton.textContent = 'Submit';
+  }
+}
+</script>
+
+{% schema %}
+{
+  "name": "Project Submission Form",
+  "target": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "default": "#4f46e5"
+    },
+    {
+      "type": "color",
+      "id": "secondary_color",
+      "label": "Secondary Color",
+      "default": "#e5e7eb"
+    }
+  ]
+}
+{% endschema %}
+
