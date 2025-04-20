@@ -21,7 +21,7 @@ export async function loader({ request }) {
   if (!query) {
     return json({ products: [], domain: null }, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin    ': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },

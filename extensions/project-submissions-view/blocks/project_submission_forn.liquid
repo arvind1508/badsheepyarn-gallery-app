@@ -790,149 +790,102 @@ let selectedVariants = {};
 let isLoading = false;
 let storeDomain = window.Shopify.shop;
 console.log(storeDomain);
-let API_PATH = 'https://street-monaco-premier-ferry.trycloudflare.com';
+let API_PATH = 'https://studies-dist-bigger-equations.trycloudflare.com';
 
 
 function searchProducts(query) {
-  if (query.length < 2) {
+  if (!query) {
     document.getElementById('product-results').innerHTML = '';
     return;
   }
 
   isLoading = true;
-  const resultsDiv = document.getElementById('product-results');
-  resultsDiv.innerHTML = '<div class="loading-spinner"></div>';
-  query.shop = storeDomain;
+  const resultsContainer = document.getElementById('product-results');
+  resultsContainer.innerHTML = '<div class="loading-spinner"></div>';
 
-  fetch(`${API_PATH}/api/products?query=${encodeURIComponent(query)}`)
+  fetch(`${API_PATH}/api/products?query=${encodeURIComponent(query)}`, {
+    headers: {
+      'X-Shopify-Shop-Domain': storeDomain
+    }
+  })
     .then(response => response.json())
     .then(data => {
-      isLoading = false;
-      resultsDiv.innerHTML = '';
-
       if (data.error) {
-        resultsDiv.innerHTML = `
-          <div class="error-message">
-            ${data.error}
-            ${data.details ? `<br><small>${data.details}</small>` : ''}
+        throw new Error(data.error);
+      }
+
+      const { products, domain } = data;
+      storeDomain = domain;
+
+      if (products.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results">No products found</div>';
+        return;
+      }
+
+      resultsContainer.innerHTML = products.map(product => `
+        <div class="product-item" data-product='${JSON.stringify(product)}'>
+          <img src="${product.imageUrl}" alt="${product.title}" class="product-image" width="80" height="80">
+          <div class="product-details">
+            <div class="product-title">
+              <a href="https://${domain}/products/${product.handle}" target="_blank">
+                ${product.title}
+              </a>
+            </div>
+            <div class="product-price">
+              ${product.currency} ${product.price.toFixed(2)}
+            </div>
+            ${Object.keys(product.options).length > 0 ? `
+              <div class="product-variants">
+                ${Object.entries(product.options).map(([name, value]) => `
+                  <div>${name}: ${value}</div>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
-        `;
-        return;
-      }
+        </div>
+      `).join('');
 
-      if (data.products.length === 0) {
-        resultsDiv.innerHTML = '<div class="no-results">No products found</div>';
-        return;
-      }
-
-      storeDomain = data.domain;
-
-      data.products.forEach(product => {
-        const div = document.createElement('div');
-        div.className = 'product-item';
-        
-        const details = document.createElement('div');
-        details.className = 'product-details';
-        
-        if (product.image) {
-          const img = document.createElement('img');
-          img.className = 'product-image';
-          img.src = product.image;
-          img.alt = product.imageAlt || product.title;
-          div.appendChild(img);
-        }
-        
-        const info = document.createElement('div');
-        info.className = 'product-info';
-        
-        const title = document.createElement('div');
-        title.className = 'product-title';
-        title.textContent = product.title;
-        info.appendChild(title);
-        
-        const priceDiv = document.createElement('div');
-        priceDiv.className = 'product-price';
-        priceDiv.textContent = `$${product.price}`;
-        if (product.compareAtPrice) {
-          const comparePrice = document.createElement('span');
-          comparePrice.className = 'compare-price';
-          comparePrice.textContent = `$${product.compareAtPrice}`;
-          priceDiv.appendChild(comparePrice);
-        }
-        info.appendChild(priceDiv);
-        
-        const options = document.createElement('div');
-        options.className = 'product-options';
-        options.textContent = `${product.options.length} options available`;
-        info.appendChild(options);
-        
-        div.appendChild(info);
-        div.onclick = () => selectProduct(product);
-        resultsDiv.appendChild(div);
+      // Add click handlers
+      document.querySelectorAll('.product-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const product = JSON.parse(item.dataset.product);
+          selectProduct(product);
+        });
       });
     })
     .catch(error => {
-      isLoading = false;
       console.error('Error searching products:', error);
-      resultsDiv.innerHTML = `
+      resultsContainer.innerHTML = `
         <div class="error-message">
-          Error searching products. Please try again.
-          <br><small>${error.message}</small>
+          Error searching products: ${error.message}
+          <small>Please try again later</small>
         </div>
       `;
+    })
+    .finally(() => {
+      isLoading = false;
     });
 }
 
 function selectProduct(product) {
   selectedProduct = product;
-  document.getElementById('selected-product-id').value = product.id;
+  selectedVariants = { ...product.options };
+
+  const selectedContainer = document.querySelector('.selected-product');
+  selectedContainer.innerHTML = `
+    <img src="${product.imageUrl}" alt="${product.title}" class="selected-product-image" width="100" height="100">
+    <div class="selected-product-details">
+      <div class="selected-product-title">${product.title}</div>
+      <div class="selected-product-variant">
+        ${Object.entries(product.options).map(([name, value]) => `
+          <div>${name}: ${value}</div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
   document.getElementById('product-results').innerHTML = '';
-  document.getElementById('product-search').value = product.title;
-  
-  // Update selected product display
-  const selectedDisplay = document.getElementById('selected-product-display');
-  const selectedImage = document.getElementById('selected-product-image');
-  const selectedTitle = document.getElementById('selected-product-title');
-  const selectedPrice = document.getElementById('selected-product-variant');
-  
-  selectedImage.src = product.image || '/assets/no-image.png';
-  selectedImage.alt = product.imageAlt || product.title;
-  selectedTitle.textContent = product.title;
-  selectedPrice.textContent = `$${product.price}`;
-  selectedDisplay.style.display = 'flex';
-  
-  // Show option selection
-  const optionSelection = document.getElementById('variant-selection');
-  optionSelection.style.display = 'block';
-  
-  // Clear previous option selections
-  const optionOptions = document.getElementById('variant-options');
-  optionOptions.innerHTML = '';
-  
-  // Create select elements for each option
-  product.options.forEach(option => {
-    const div = document.createElement('div');
-    div.className = 'variant-option';
-    
-    const label = document.createElement('label');
-    label.textContent = option.name;
-    div.appendChild(label);
-    
-    const select = document.createElement('select');
-    select.dataset.optionName = option.name;
-    select.onchange = () => updateOptionSelection(option.name, select.value);
-    
-    // Add options to select
-    option.values.forEach(value => {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = value;
-      select.appendChild(option);
-    });
-    
-    div.appendChild(select);
-    optionOptions.appendChild(div);
-  });
+  document.getElementById('product-search').value = '';
 }
 
 function updateOptionSelection(optionName, value) {
@@ -1191,6 +1144,11 @@ function prepareFormData() {
     product: {
       id: selectedProduct.id,
       title: selectedProduct.title,
+      handle: selectedProduct.handle,
+      imageUrl: selectedProduct.image,
+      price: selectedProduct.price,
+      variantId: selectedProduct.variantId,
+      variantTitle: selectedProduct.variantTitle,
       options: selectedVariants
     },
     nameDisplay: document.querySelector('select[required]').value,
@@ -1211,30 +1169,11 @@ async function handleSubmit(event) {
 
   const formData = prepareFormData();
   
-  // Log the full payload
-  console.group('Form Submission Payload');
-  console.log('Full Form Data:', formData);
-  console.log('Selected Product:', selectedProduct);
-  console.log('Selected Variants:', selectedVariants);
-  console.log('Store Domain:', storeDomain);
-  console.log('API Path:', API_PATH);
-  console.groupEnd();
-
   const submitButton = event.target.querySelector('.submit');
   submitButton.disabled = true;
   submitButton.textContent = 'Submitting...';
 
   try {
-    // Log the request details
-    console.group('API Request Details');
-    console.log('Request URL:', `${API_PATH}/api/submissions`);
-    console.log('Request Headers:', {
-      'Content-Type': 'application/json',
-      'X-Shopify-Shop-Domain': storeDomain
-    });
-    console.log('Request Body:', formData);
-    console.groupEnd();
-
     const response = await fetch(`${API_PATH}/api/submissions`, {
       method: 'POST',
       headers: {
@@ -1246,14 +1185,8 @@ async function handleSubmit(event) {
 
     const result = await response.json();
 
-    // Log the response
-    console.group('API Response');
-    console.log('Status:', response.status);
-    console.log('Response:', result);
-    console.groupEnd();
-
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to submit form');
+      throw new Error(result.error || 'Failed to submit form');
     }
 
     // Show success message

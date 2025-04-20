@@ -1,16 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
-// enough when changing adapters.
-// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:admin@localhost:5432/badsheepyarn-app"
 }
 
 model Session {
@@ -19,7 +13,7 @@ model Session {
   state         String
   isOnline      Boolean   @default(false)
   scope         String?
-  expires       DateTime? @db.Timestamp
+  expires       DateTime? @db.Timestamp(6)
   accessToken   String
   userId        BigInt?
   firstName     String?
@@ -31,75 +25,68 @@ model Session {
   emailVerified Boolean?  @default(false)
 }
 
-enum ProjectStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 model Customer {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  name        String
-  phone       String?
-  createdAt   DateTime  @default(now()) @db.Timestamp
-  updatedAt   DateTime  @updatedAt @db.Timestamp
-  projects    Project[]
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  phone     String?
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @db.Timestamp(6)
+  projects  Project[]
 }
 
 model Project {
-  id          String        @id @default(uuid())
+  id          String         @id @default(uuid())
   title       String
   description String
-  status      ProjectStatus @default(PENDING)
+  status      ProjectStatus  @default(PENDING)
   customerId  String
-  customer    Customer      @relation(fields: [customerId], references: [id])
+  adminNotes  String?
+  createdAt   DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime       @updatedAt @db.Timestamp(6)
+  approvedAt  DateTime?      @db.Timestamp(6)
+  rejectedAt  DateTime?      @db.Timestamp(6)
+  approvedBy  String?
+  shop        String?
+  customer    Customer       @relation(fields: [customerId], references: [id])
   images      ProjectImage[]
-  adminNotes  String?       // For admin to add notes/comments
-  createdAt   DateTime      @default(now()) @db.Timestamp
-  updatedAt   DateTime      @updatedAt @db.Timestamp
-  approvedAt  DateTime?     @db.Timestamp // When the project was approved
-  rejectedAt  DateTime?     @db.Timestamp // When the project was rejected
-  approvedBy  String?       // Admin's ID who approved/rejected
 }
 
 model ProjectImage {
-  id                  String    @id @default(cuid())
-  url                 String
-  filename            String
-  size                Int
-  mimetype            String
-  projectId           String?
-  project             Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  submissionId        String?
-  submission          ProjectSubmission? @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  createdAt           DateTime  @default(now()) @db.Timestamp
-  updatedAt           DateTime  @updatedAt @db.Timestamp
+  id           String             @id @default(cuid())
+  url          String
+  filename     String
+  size         Int
+  mimetype     String
+  projectId    String?
+  submissionId String?
+  createdAt    DateTime           @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime           @updatedAt @db.Timestamp(6)
+  project      Project?           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submission   ProjectSubmission? @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
 
 model ProjectSubmission {
-  id                  String    @id @default(cuid())
-  firstName           String
-  lastName            String
-  email               String
-  projectName         String
-  patternName         String?
-  designerName        String?
-  patternLink         String?
-  productId           String
+  id                    String         @id @default(cuid())
+  firstName             String
+  lastName              String
+  email                 String
+  projectName           String
+  patternName           String?
+  designerName          String?
+  patternLink           String?
+  productId             String
   nameDisplayPreference String
-  socialMediaHandle   String?
-  status              String    @default("pending")
-  submittedAt         DateTime  @default(now()) @db.Timestamp
-  approvedAt          DateTime? @db.Timestamp
-  rejectedAt          DateTime? @db.Timestamp
-  rejectionReason     String?
-  createdAt           DateTime  @default(now()) @db.Timestamp
-  updatedAt           DateTime  @updatedAt @db.Timestamp
-
-  // Relations
-  product             Product   @relation(fields: [productId], references: [id])
-  images              ProjectImage[]
+  socialMediaHandle     String?
+  status                String         @default("pending")
+  submittedAt           DateTime       @default(now()) @db.Timestamp(6)
+  approvedAt            DateTime?      @db.Timestamp(6)
+  rejectedAt            DateTime?      @db.Timestamp(6)
+  rejectionReason       String?
+  createdAt             DateTime       @default(now()) @db.Timestamp(6)
+  updatedAt             DateTime       @updatedAt @db.Timestamp(6)
+  images                ProjectImage[]
+  product               Product        @relation(fields: [productId], references: [id])
 
   @@index([email])
   @@index([status])
@@ -108,13 +95,20 @@ model ProjectSubmission {
 }
 
 model Product {
-  id                  String    @id @default(cuid())
-  title               String
-  handle              String
-  description         String?
-  price               Float
-  imageUrl            String
-  submissions         ProjectSubmission[]
-  createdAt           DateTime  @default(now()) @db.Timestamp
-  updatedAt           DateTime  @updatedAt @db.Timestamp
+  id          String              @id @default(cuid())
+  title       String
+  handle      String
+  description String?
+  price       Float
+  imageUrl    String
+  selectedOption Json?
+  createdAt   DateTime            @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime            @updatedAt @db.Timestamp(6)
+  submissions ProjectSubmission[]
+}
+
+enum ProjectStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

@@ -1,89 +1,101 @@
 import { json } from "@remix-run/node";
-import prisma  from "../db.server";
-import { authenticate } from "../shopify.server";
+import  prisma  from "../db.server";
 
-// GET /api/submissions - Get all submissions with pagination and filtering
+// GET /api/submissions - Get all submissions with optional filters
 export async function loader({ request }) {
-  const { admin } = await authenticate.admin(request);
-  console.log( prisma,'prisma')
-  
   try {
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "10");
-    const status = url.searchParams.get("status");
-    const skip = (page - 1) * limit;
+    const searchParams = url.searchParams;
+    const query = searchParams.get("query") || "";
+    const status = searchParams.get("status") || "all";
+    const page = parseInt(searchParams.get("page") || "1");
+    const sortKey = searchParams.get("sortKey") || "createdAt";
+    const sortDirection = searchParams.get("sortDirection") || "desc";
+    const perPage = 10;
 
-    // Build the where clause based on status
-    const where = status && status !== "all" ? { status } : {};
+    const where = {
+      ...(query && {
+        OR: [
+          { firstName: { contains: query, mode: "insensitive" } },
+          { lastName: { contains: query, mode: "insensitive" } },
+          { projectName: { contains: query, mode: "insensitive" } },
+        ],
+      }),
+      ...(status !== "all" && { status }),
+    };
 
-    // Get total count for pagination
-    const total = await prisma.ProjectSubmission.count({ where });
+    const [submissions, total] = await Promise.all([
+      prisma.projectSubmission.findMany({
+        where,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { [sortKey]: sortDirection },
+        include: {
+          product: true,
+          images: true,
+        },
+      }),
+      prisma.projectSubmission.count({ where }),
+    ]);
 
-    // Get submissions with pagination and filtering
-    const submissions = await prisma.ProjectSubmission.findMany({
-      where,
-      include: {
-        product: true,
-        images: true
-      },
-      orderBy: {
-        submittedAt: 'desc'
-      },
-      skip,
-      take: limit
-    });
-
-    return json({ 
+    return json({
       submissions,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
+      total,
+      page,
+      perPage,
+      query,
+      status,
+      sortKey,
+      sortDirection,
     });
   } catch (error) {
-    console.error('Error fetching submissions:', error);
-    return json({ error: 'Failed to fetch submissions' }, { status: 500 });
+    console.error("Error fetching submissions:", error);
+    return json({ error: "Failed to fetch submissions" }, { status: 500 });
   }
 }
 
 // POST /api/submissions - Create a new submission
 export async function action({ request }) {
-  const { admin } = await authenticate.admin(request);
-
-  if (request.method === "POST") {
-    try {
-      const formData = await request.formData();
-      const data = Object.fromEntries(formData);
+  try {
+    if (request.method === "POST") {
+      const data = await request.json();
       
-      // Handle file uploads
-      const images = [];
-      const files = formData.getAll('images');
-      
-      for (const file of files) {
-        if (file instanceof File) {
-          // Upload to Shopify media
-          const upload = await admin.rest.resources.Asset.create({
-            key: `submissions/${Date.now()}-${file.name}`,
-            input: {
-              contentType: file.type,
-              body: await file.arrayBuffer()
-            }
-          });
+      // Validate required fields
+      const requiredFields = [
+        "firstName",
+        "lastName",
+        "email",
+        "projectName",
+        "patternName",
+        "designerName",
+        "patternLink",
+        "product",
+        "nameDisplay",
+        "socialMedia",
+      ];
 
-          images.push({
-            url: upload.public_url,
-            filename: file.name,
-            size: file.size,
-            mimetype: file.type
-          });
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          return json(
+            { error: `Missing required field: ${field}` },
+            { status: 400 }
+          );
         }
       }
 
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        return json({ error: "Invalid email format" }, { status: 400 });
+      }
+
+      // Validate product data
+      if (!data.product || !data.product.shopifyId) {
+        return json({ error: "Invalid product data" }, { status: 400 });
+      }
+
       // Create submission
-      const submission = await prisma.ProjectSubmission.create({
+      const submission = await prisma.projectSubmission.create({
         data: {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -92,68 +104,91 @@ export async function action({ request }) {
           patternName: data.patternName,
           designerName: data.designerName,
           patternLink: data.patternLink,
-          productId: data.productId,
-          nameDisplayPreference: data.nameDisplayPreference,
-          socialMediaHandle: data.socialMediaHandle,
-          images: {
-            create: images
+          product: {
+            create: {
+              shopifyId: data.product.id,
+              title: data.product.title,
+              handle: data.product.handle,
+              imageUrl: data.product.imageUrl,
+              price: data.product.price,
+              currency: data.product.currency,
+              variantId: data.product.variantId,
+              variantTitle: data.product.variantTitle,
+              selectedOption: JSON.stringify(data.product.options || {}),
+            }
           },
-          status: 'pending'
+          nameDisplayPreference: data.nameDisplay,
+          socialMediaHandle: data.socialMedia,
+          status: "pending",
+          submittedAt: new Date(),
+          images: {
+            create: data.images?.map((image) => ({
+              url: image.url,
+              filename: image.url.split('/').pop() || 'image.jpg',
+              size: 0,
+              mimetype: 'image/jpeg',
+            })) || [],
+          },
         },
         include: {
           product: true,
-          images: true
-        }
+          images: true,
+        },
       });
 
       return json({ submission }, { status: 201 });
-    } catch (error) {
-      console.error('Error creating submission:', error);
-      return json({ error: 'Failed to create submission' }, { status: 500 });
     }
-  }
 
-  // PUT /api/submissions/:id - Update submission status
-  if (request.method === "PUT") {
-    try {
-      const { id, status, rejectionReason } = await request.json();
+    // PUT /api/submissions/:id - Update submission status
+    if (request.method === "PUT") {
+      const url = new URL(request.url);
+      const id = url.pathname.split("/").pop();
+      const data = await request.json();
 
-      const submission = await prisma.ProjectSubmission.update({
+      if (!id) {
+        return json({ error: "Missing submission ID" }, { status: 400 });
+      }
+
+      if (!data.status) {
+        return json({ error: "Missing status" }, { status: 400 });
+      }
+
+      const validStatuses = ["pending", "approved", "rejected"];
+      if (!validStatuses.includes(data.status)) {
+        return json({ error: "Invalid status" }, { status: 400 });
+      }
+
+      const submission = await prisma.projectSubmission.update({
         where: { id },
-        data: {
-          status,
-          ...(status === 'rejected' && { rejectionReason }),
-          ...(status === 'approved' && { approvedAt: new Date() }),
-          ...(status === 'rejected' && { rejectedAt: new Date() })
-        },
+        data: { status: data.status },
         include: {
           product: true,
-          images: true
-        }
+          images: true,
+        },
       });
 
       return json({ submission });
-    } catch (error) {
-      console.error('Error updating submission:', error);
-      return json({ error: 'Failed to update submission' }, { status: 500 });
     }
-  }
 
-  // DELETE /api/submissions/:id - Delete a submission
-  if (request.method === "DELETE") {
-    try {
-      const { id } = await request.json();
-      
-      await prisma.ProjectSubmission.delete({
-        where: { id }
+    // DELETE /api/submissions/:id - Delete a submission
+    if (request.method === "DELETE") {
+      const url = new URL(request.url);
+      const id = url.pathname.split("/").pop();
+
+      if (!id) {
+        return json({ error: "Missing submission ID" }, { status: 400 });
+      }
+
+      await prisma.projectSubmission.delete({
+        where: { id },
       });
 
       return json({ success: true });
-    } catch (error) {
-      console.error('Error deleting submission:', error);
-      return json({ error: 'Failed to delete submission' }, { status: 500 });
     }
-  }
 
-  return json({ error: 'Method not allowed' }, { status: 405 });
+    return json({ error: "Method not allowed" }, { status: 405 });
+  } catch (error) {
+    console.error("Error processing submission:", error);
+    return json({ error: "Failed to process submission" }, { status: 500 });
+  }
 } 

@@ -1,220 +1,308 @@
+import { json } from "@remix-run/node";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
 import {
-  TextField,
+  Page,
+  Layout,
+  Card,
   IndexTable,
-  LegacyCard,
+  Text,
+  Badge,
+  Button,
+  Pagination,
+  TextField,
   IndexFilters,
   useSetIndexFiltersMode,
   useIndexResourceState,
-  Text,
   ChoiceList,
-  RangeSlider,
-  Badge,
   useBreakpoints,
-  Toast,
-  Pagination,
-} from '@shopify/polaris';
-import { useState, useCallback, useEffect } from 'react';
-import { useNavigate, useFetcher } from '@remix-run/react';
-import SubmissionActions from '../components/SubmissionActions';
+} from "@shopify/polaris";
+import { useState, useCallback } from "react";
+import  prisma from "../db.server";
 
-function Page() {
-  const navigate = useNavigate();
-  const fetcher = useFetcher();
-  const [submissions, setSubmissions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [toast, setToast] = useState(null);
+export const loader = async ({ request }) => {
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
+  const query = searchParams.get("query") || "";
+  const status = searchParams.get("status") || "all";
+  const page = parseInt(searchParams.get("page") || "1");
+  const sortKey = searchParams.get("sortKey") || "createdAt";
+  const sortDirection = searchParams.get("sortDirection") || "desc";
+  const perPage = 10;
+
+  const where = {
+    ...(query && {
+      OR: [
+        { firstName: { contains: query, mode: "insensitive" } },
+        { lastName: { contains: query, mode: "insensitive" } },
+        { projectName: { contains: query, mode: "insensitive" } },
+      ],
+    }),
+    ...(status !== "all" && { status }),
+  };
+  console.log(where,'submissions')
+
+  const [submissions, total] = await Promise.all([
+    prisma.projectSubmission.findMany({
+      where,
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { [sortKey]: sortDirection },
+      include: {
+        product: true,
+        images: true,
+      },
+    }),
+    prisma.projectSubmission.count({ where }),
+  ]);
+
+  return json({
+    submissions,
+    total,
+    page,
+    perPage,
+    query,
+    status,
+    sortKey,
+    sortDirection,
+  });
+};
+
+export default function Submissions() {
+  const { submissions, total, page, perPage, query, status, sortKey, sortDirection } = useLoaderData();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(submissions);
+  const [itemStrings, setItemStrings] = useState(["All", "Pending", "Approved", "Rejected"]);
   const [selected, setSelected] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [mode, setMode] = useState('default');
+  const { smUp } = useBreakpoints();
+  const { mode, setMode } = useSetIndexFiltersMode();
 
-  const tabs = [
+
+
+
+  const onCreateNewView = async (value) => {
+    setItemStrings([...itemStrings, value]);
+    setSelected(itemStrings.length);
+    return true;
+  };
+
+  const tabs = itemStrings.map((item, index) => ({
+    content: item,
+    index,
+    onAction: () => {
+      setSelected(index);
+      setSearchParams((prev) => {
+        prev.set("status", index === 0 ? "all" : item.toLowerCase());
+        prev.set("page", "1");
+        return prev;
+      });
+    },
+    id: `${item.toLowerCase()}-tab`,
+    isLocked: index === 0,
+    actions: []
+  }));
+
+  // Sorting options
+  const sortOptions = [
+    { label: 'Date', value: 'createdAt', directionLabel: 'Newest first' },
+    { label: 'Date', value: 'createdAt', directionLabel: 'Oldest first' },
+    { label: 'Name', value: 'firstName', directionLabel: 'A-Z' },
+    { label: 'Name', value: 'firstName', directionLabel: 'Z-A' },
+    { label: 'Project', value: 'projectName', directionLabel: 'A-Z' },
+    { label: 'Project', value: 'projectName', directionLabel: 'Z-A' },
+  ];
+
+  // Filter states
+  const [nameFilter, setNameFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState([]);
+
+  // Filter handlers
+  const handleNameFilterChange = useCallback((value) => setNameFilter(value), []);
+  const handleStatusFilterChange = useCallback((value) => setStatusFilter(value), []);
+
+  const filters = [
     {
-      content: 'All',
-      id: 'all',
-      panelID: 'all-content',
+      key: 'name',
+      label: 'Name',
+      filter: (
+        <TextField
+          label="Name"
+          value={nameFilter}
+          onChange={handleNameFilterChange}
+          autoComplete="off"
+          labelHidden
+        />
+      ),
     },
     {
-      content: 'Pending',
-      id: 'pending',
-      panelID: 'pending-content',
-    },
-    {
-      content: 'Approved',
-      id: 'approved',
-      panelID: 'approved-content',
+      key: 'status',
+      label: 'Status',
+      filter: (
+        <ChoiceList
+          title="Status"
+          titleHidden
+          choices={[
+            { label: 'Pending', value: 'pending' },
+            { label: 'Approved', value: 'approved' },
+            { label: 'Rejected', value: 'rejected' },
+          ]}
+          selected={statusFilter}
+          onChange={handleStatusFilterChange}
+          allowMultiple
+        />
+      ),
     },
   ];
 
-  // Fetch submissions when tab or page changes
-  useEffect(() => {
-    const status = selected === 0 ? 'all' : tabs[selected].id;
-    fetcher.load(`/api/submissions?page=${currentPage}&status=${status}`);
-  }, [selected, currentPage]);
+  const appliedFilters = [];
+  if (nameFilter) {
+    appliedFilters.push({
+      key: 'name',
+      label: `Name contains ${nameFilter}`,
+      onRemove: () => setNameFilter(''),
+    });
+  }
+  if (statusFilter.length > 0) {
+    appliedFilters.push({
+      key: 'status',
+      label: `Status: ${statusFilter.join(', ')}`,
+      onRemove: () => setStatusFilter([]),
+    });
+  }
 
-  // Update submissions when data is loaded
-  useEffect(() => {
-    if (fetcher.data) {
-      setSubmissions(fetcher.data.submissions || []);
-      setTotalPages(fetcher.data.pagination?.totalPages || 1);
-      setIsLoading(false);
-    }
-  }, [fetcher.data]);
+  const handleSort = useCallback(
+    (key) => {
+      setSearchParams((prev) => {
+        prev.set("sortKey", key);
+        prev.set("sortDirection", sortDirection === "asc" ? "desc" : "asc");
+        return prev;
+      });
+    },
+    [sortDirection]
+  );
 
-  const handleTabChange = useCallback((selectedTabIndex) => {
-    setSelected(selectedTabIndex);
-    setCurrentPage(1); // Reset to first page when changing tabs
+  const handleSearch = useCallback((value) => {
+    setSearchParams((prev) => {
+      prev.set("query", value);
+      prev.set("page", "1");
+      return prev;
+    });
   }, []);
 
-  const onApprove = async (id) => {
-    try {
-      const response = await fetch(`/api/submissions/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'approved' }),
-      });
+  const handleSearchCancel = useCallback(() => {
+    setSearchParams((prev) => {
+      prev.delete("query");
+      prev.set("page", "1");
+      return prev;
+    });
+  }, []);
 
-      if (response.ok) {
-        setToast({
-          content: 'Submission approved successfully',
-          error: false,
-        });
-        // Refresh submissions
-        const status = selected === 0 ? 'all' : tabs[selected].id;
-        fetcher.load(`/api/submissions?page=${currentPage}&status=${status}`);
-      } else {
-        throw new Error('Failed to approve submission');
-      }
-    } catch (error) {
-      setToast({
-        content: 'Error approving submission',
-        error: true,
-      });
-    }
-  };
+  const handlePagination = useCallback((page) => {
+    setSearchParams((prev) => {
+      prev.set("page", page.toString());
+      return prev;
+    });
+  }, []);
 
-  const onReject = async (id) => {
-    try {
-      const response = await fetch(`/api/submissions/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'rejected' }),
-      });
-
-      if (response.ok) {
-        setToast({
-          content: 'Submission rejected successfully',
-          error: false,
-        });
-        // Refresh submissions
-        const status = selected === 0 ? 'all' : tabs[selected].id;
-        fetcher.load(`/api/submissions?page=${currentPage}&status=${status}`);
-      } else {
-        throw new Error('Failed to reject submission');
-      }
-    } catch (error) {
-      setToast({
-        content: 'Error rejecting submission',
-        error: true,
-      });
-    }
-  };
-
-  const onView = (id) => {
-    navigate(`/app/view/${id}`);
+  const resourceName = {
+    singular: "submission",
+    plural: "submissions",
   };
 
   const rowMarkup = submissions.map(
-    ({ id, projectName, submittedAt, designerName, product, status }, index) => (
+    ({ id, firstName, lastName, projectName, status, createdAt, product }, index) => (
       <IndexTable.Row
         id={id}
         key={id}
-        selected={false}
+        selected={selectedResources.includes(id)}
         position={index}
       >
         <IndexTable.Cell>
           <Text variant="bodyMd" fontWeight="bold" as="span">
-            {projectName}
+            {firstName} {lastName}
           </Text>
         </IndexTable.Cell>
-        <IndexTable.Cell>{designerName}</IndexTable.Cell>
-        <IndexTable.Cell>{product?.title}</IndexTable.Cell>
-        <IndexTable.Cell>{new Date(submittedAt).toLocaleDateString()}</IndexTable.Cell>
+        <IndexTable.Cell>{projectName}</IndexTable.Cell>
+        <IndexTable.Cell>{product?.title || "No product selected"}</IndexTable.Cell>
         <IndexTable.Cell>
-          <Badge tone={status === 'approved' ? 'success' : status === 'rejected' ? 'critical' : 'attention'}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+          <Badge status={status === "approved" ? "success" : status === "rejected" ? "critical" : "warning"}>
+            {status}
           </Badge>
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <SubmissionActions
-            onApprove={() => onApprove(id)}
-            onReject={() => onReject(id)}
-            onView={() => onView(id)}
-            status={status}
-          />
+          {new Date(createdAt).toLocaleDateString()}
+        </IndexTable.Cell>
+        <IndexTable.Cell>
+          <Button onClick={() => window.location.href = `/app/submissions/${id}`}>
+            View Details
+          </Button>
         </IndexTable.Cell>
       </IndexTable.Row>
-    ),
+    )
   );
 
   return (
-    <>
-      <LegacyCard>
-        <IndexFilters
-          tabs={tabs}
-          selected={selected}
-          onSelect={handleTabChange}
-          canCreateNewView={false}
-          hideQueryField
-          hideFilters
-          mode={mode}
-          setMode={setMode}
-          
-        />
-        <IndexTable
-          condensed={useBreakpoints().smDown}
-          resourceName={{ singular: 'submission', plural: 'submissions' }}
-          itemCount={submissions.length}
-          headings={[
-            { title: 'Project Name' },
-            { title: 'Designer' },
-            { title: 'Product' },
-            { title: 'Date' },
-            { title: 'Status' },
-            { title: 'Actions' },
-          ]}
-          loading={isLoading}
-        >
-          {rowMarkup}
-        </IndexTable>
-        <div style={{ 
-          padding: '1rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <Pagination
-            hasPrevious={currentPage > 1}
-            hasNext={currentPage < totalPages}
-            onPrevious={() => setCurrentPage(currentPage - 1)}
-            onNext={() => setCurrentPage(currentPage + 1)}
-            label={`Page ${currentPage} of ${totalPages}`}
-          />
-        </div>
-      </LegacyCard>
-      {toast && (
-        <Toast
-          content={toast.content}
-          error={toast.error}
-          onDismiss={() => setToast(null)}
-        />
-      )}
-    </>
+    <Page title="Project Submissions">
+      <Layout>
+        <Layout.Section>
+          <Card>
+            <IndexFilters
+              sortOptions={sortOptions}
+              sortSelected={[sortKey, sortDirection]}
+              queryValue={query}
+              queryPlaceholder="Search submissions"
+              onQueryChange={handleSearch}
+              onQueryClear={handleSearchCancel}
+              onSort={handleSort}
+              tabs={tabs}
+              selected={selected}
+              onSelect={setSelected}
+              canCreateNewView
+              onCreateNewView={onCreateNewView}
+              filters={filters}
+              appliedFilters={appliedFilters}
+              mode={mode}
+              setMode={setMode}
+              hideQueryField={false}
+              hideFilters={false}
+              cancelAction={{
+                onAction: handleSearchCancel,
+                disabled: false,
+                loading: false,
+              }}
+            />
+            <IndexTable
+              resourceName={resourceName}
+              itemCount={total}
+              selectedItemsCount={
+                allResourcesSelected ? "All" : selectedResources.length
+              }
+              onSelectionChange={handleSelectionChange}
+              headings={[
+                { title: "Name" },
+                { title: "Project" },
+                { title: "Product" },
+                { title: "Status" },
+                { title: "Date" },
+                { title: "Actions" },
+              ]}
+              pagination={
+                <Pagination
+                  hasNext={page * perPage < total}
+                  hasPrevious={page > 1}
+                  onNext={() => handlePagination(page + 1)}
+                  onPrevious={() => handlePagination(page - 1)}
+                  label={`${(page - 1) * perPage + 1}-${Math.min(
+                    page * perPage,
+                    total
+                  )} of ${total}`}
+                />
+              }
+            >
+              {rowMarkup}
+            </IndexTable>
+          </Card>
+        </Layout.Section>
+      </Layout>
+    </Page>
   );
-}
-
-export default Page;
+} 

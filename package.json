@@ -2,7 +2,7 @@
   "name": "bad-ship-gallery",
   "private": true,
   "scripts": {
-    "build": "remix vite:build",
+    "build": "npx prisma generate &&  remix vite:build",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
@@ -37,6 +37,7 @@
     "prisma": "^6.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-image-gallery": "^1.4.0",
     "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {

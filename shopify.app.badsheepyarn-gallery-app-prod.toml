@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "0c38d317b3cda3bdc82fba4fa198b57d"
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = true
+name = "badsheepyarn-gallery-app"
+handle = "badsheepyarn-gallery-app"
+
+[build]
+include_config_on_deploy = true
+dev_store_url = "badsheepyarn-gallery.myshopify.com"
+automatically_update_urls_on_dev = false
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://badsheepyarn-gallery-app.vercel.app/auth/callback",
+  "https://badsheepyarn-gallery-app.vercel.app/auth/shopify/callback",
+  "https://badsheepyarn-gallery-app.vercel.app/api/auth/callback"
+]
+
+[pos]
+embedded = false
