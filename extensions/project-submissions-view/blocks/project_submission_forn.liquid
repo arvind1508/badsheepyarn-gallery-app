@@ -702,7 +702,7 @@ select.form-input {
         </div>
 
         <div id="selected-product-display" class="selected-product" style="display: none;">
-          <img id="selected-product-image" class="selected-product-image" src="" alt="">
+          <img id="selected-product-image" class="selected-product-image" src="" alt="" width="100" height="100">
           <div class="selected-product-details">
             <div id="selected-product-title" class="selected-product-title"></div>
             <div id="selected-product-variant" class="selected-product-variant"></div>
@@ -790,7 +790,7 @@ let selectedVariants = {};
 let isLoading = false;
 let storeDomain = window.Shopify.shop;
 console.log(storeDomain);
-let API_PATH = 'https://studies-dist-bigger-equations.trycloudflare.com';
+let API_PATH = 'https://normally-alt-park-usual.trycloudflare.com';
 
 
 function searchProducts(query) {
@@ -803,11 +803,7 @@ function searchProducts(query) {
   const resultsContainer = document.getElementById('product-results');
   resultsContainer.innerHTML = '<div class="loading-spinner"></div>';
 
-  fetch(`${API_PATH}/api/products?query=${encodeURIComponent(query)}`, {
-    headers: {
-      'X-Shopify-Shop-Domain': storeDomain
-    }
-  })
+  fetch(`${API_PATH}/api/products/?query=${encodeURIComponent(query)}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
@@ -824,7 +820,7 @@ function searchProducts(query) {
 
       resultsContainer.innerHTML = products.map(product => `
         <div class="product-item" data-product='${JSON.stringify(product)}'>
-          <img src="${product.imageUrl}" alt="${product.title}" class="product-image" width="80" height="80">
+          <img src="${product.image}" alt="${product.title}" class="product-image" width="80" height="80">
           <div class="product-details">
             <div class="product-title">
               <a href="https://${domain}/products/${product.handle}" target="_blank">
@@ -832,15 +828,21 @@ function searchProducts(query) {
               </a>
             </div>
             <div class="product-price">
-              ${product.currency} ${product.price.toFixed(2)}
+              ${product.price}
             </div>
-            ${Object.keys(product.options).length > 0 ? `
-              <div class="product-variants">
-                ${Object.entries(product.options).map(([name, value]) => `
-                  <div>${name}: ${value}</div>
-                `).join('')}
-              </div>
-            ` : ''}
+            {% comment %} <div class="product-options">
+              ${product.options.map(option => `
+                <div class="variant-option">
+                  <label>${option.name}</label>
+                  <select onchange="updateOptionSelection('${option.name}', this.value)">
+                    <option value="">Select ${option.name}</option>
+                    ${option.values.map(value => `
+                      <option value="${value}">${value}</option>
+                    `).join('')}
+                  </select>
+                </div>
+              `).join('')}
+            </div> {% endcomment %}
           </div>
         </div>
       `).join('');
@@ -869,21 +871,40 @@ function searchProducts(query) {
 
 function selectProduct(product) {
   selectedProduct = product;
-  selectedVariants = { ...product.options };
+  selectedVariants = {};
 
-  const selectedContainer = document.querySelector('.selected-product');
-  selectedContainer.innerHTML = `
-    <img src="${product.imageUrl}" alt="${product.title}" class="selected-product-image" width="100" height="100">
-    <div class="selected-product-details">
-      <div class="selected-product-title">${product.title}</div>
-      <div class="selected-product-variant">
-        ${Object.entries(product.options).map(([name, value]) => `
-          <div>${name}: ${value}</div>
+  // Show the selected product display
+  const selectedContainer = document.getElementById('selected-product-display');
+  selectedContainer.style.display = 'flex';
+  
+  // Update the selected product image
+  const productImage = document.getElementById('selected-product-image');
+  productImage.src = product.image;
+  productImage.alt = product.title;
+  productImage.width = 100;
+  productImage.height = 100;
+
+  // Update the selected product title
+  document.getElementById('selected-product-title').textContent = product.title;
+
+  // Create option selects
+  const variantOptions = document.getElementById('variant-options');
+  variantOptions.innerHTML = product.options.map(option => `
+    <div class="variant-option">
+      <label>${option.name}</label>
+      <select onchange="updateOptionSelection('${option.name}', this.value)">
+        <option value="">Select ${option.name}</option>
+        ${option.values.map(value => `
+          <option value="${value}">${value}</option>
         `).join('')}
-      </div>
+      </select>
     </div>
-  `;
+  `).join('');
 
+  // Show the variant selection section
+  document.getElementById('variant-selection').style.display = 'block';
+
+  // Clear the search results
   document.getElementById('product-results').innerHTML = '';
   document.getElementById('product-search').value = '';
 }
@@ -897,6 +918,14 @@ function updateOptionSelection(optionName, value) {
     .map(([name, value]) => `${name}: ${value}`)
     .join(', ');
   variantDisplay.textContent = selectedOptions;
+
+  // Check if all options are selected
+  const allOptionsSelected = Object.keys(selectedVariants).length === selectedProduct.options.length;
+  if (allOptionsSelected) {
+    // Enable the next button if all options are selected
+    const nextButton = document.querySelector(`.step[data-step="6"] .next-step`);
+    nextButton.disabled = false;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1005,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const inputs = document.querySelectorAll('input, select');
   inputs.forEach(input => {
     input.addEventListener('input', function() {
+      console.log('Input changed:', this.type, this.value);
       this.classList.remove('error');
       const errorMessage = this.closest('.step').querySelector('.error-message');
       if (errorMessage) {
@@ -1085,75 +1115,158 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Add form submission handler
   const form = document.querySelector('.form-card');
-  form.addEventListener('submit', handleSubmit);
+  const submitButton = form.querySelector('.submit');
+  if (submitButton) {
+    submitButton.addEventListener('click', handleSubmit);
+  }
+
+  // Add product option change validation
+  document.addEventListener('change', function(e) {
+    if (e.target.matches('.variant-option select')) {
+      console.log('Option changed:', e.target.name, e.target.value);
+      const variantSelection = document.getElementById('variant-selection');
+      variantSelection.classList.remove('error');
+      const errorMessage = variantSelection.closest('.step').querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+    }
+  });
 });
 
 // Form validation function
 function validateForm() {
+  console.log('Starting form validation...');
   const requiredFields = document.querySelectorAll('[required]');
+  console.log('Required fields found:', requiredFields.length, requiredFields);
+  
   let isValid = true;
-  let firstInvalidField = null;
+  let missingFields = [];
 
-  requiredFields.forEach(field => {
+  // Exclude email and product options from the loop
+  const fieldsToExclude = ['email', 'productOptions'];
+  const fieldsToCheck = Array.from(requiredFields).filter(field => {
+    const fieldName = field.getAttribute('name') || field.getAttribute('id') || '';
+    return !fieldsToExclude.includes(fieldName);
+  });
+  console.log('Fields to check:', fieldsToCheck);
+
+  // Check required fields (excluding email and product options)
+  {% comment %} fieldsToCheck.forEach(field => {
+    console.log('Checking field:', field.type, field.value);
     if (!field.value.trim()) {
+      console.log('Field is empty:', field.type);
       isValid = false;
-      if (!firstInvalidField) firstInvalidField = field;
       field.classList.add('error');
+      const label = field.previousElementSibling?.textContent || field.getAttribute('placeholder') || 'This field';
+      missingFields.push(label.replace('*', '').trim());
     } else {
       field.classList.remove('error');
     }
-  });
+  }); {% endcomment %}
 
-  // Validate email format
-  const emailField = document.querySelector('input[type="email"]');
-  if (emailField && emailField.value) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailField.value)) {
+  // Validate email format separately
+  const emailField = document.querySelector('input[type="email"][required]');
+  if (emailField) {
+    const emailValue = emailField.value.trim();
+    if (!emailValue) {
+      console.log('Email is empty');
       isValid = false;
-      if (!firstInvalidField) firstInvalidField = emailField;
       emailField.classList.add('error');
+      missingFields.push('Email');
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailValue)) {
+        console.log('Email format is invalid');
+        isValid = false;
+        emailField.classList.add('error');
+        missingFields.push('Email (invalid format)');
+      } else {
+        console.log('Email is valid');
+        emailField.classList.remove('error');
+      }
     }
   }
 
-  // Validate product selection
+  // Validate product selection and options separately
   if (!selectedProduct) {
+    console.log('No product selected');
     isValid = false;
     const productSearch = document.getElementById('product-search');
-    if (!firstInvalidField) firstInvalidField = productSearch;
     productSearch.classList.add('error');
+    missingFields.push('Product selection');
+  }
+  {% comment %} } else if (Object.keys(selectedVariants).length !== selectedProduct.options.length) {
+    console.log('Not all options are selected');
+    isValid = false;
+    const variantSelection = document.getElementById('variant-selection');
+    variantSelection.classList.add('error');
+    missingFields.push('Product options');
+  } {% endcomment %}
+
+  console.log('Missing fields:', missingFields);
+  console.log('Form is valid:', isValid);
+
+  // Show error message with missing fields
+  if (!isValid) {
+    console.log('Showing error message');
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'error-message';
+    errorMessage.innerHTML = `
+      <p>Please fill in the following required fields:</p>
+      <ul style="margin-top: 1rem; padding-left: 2rem;">
+        ${missingFields.map(field => `<li>${field}</li>`).join('')}
+      </ul>
+    `;
+
+    // Remove any existing error message
+    const existingError = document.querySelector('.error-message');
+    if (existingError) {
+      existingError.remove();
+    }
+
+    // Add new error message at the top of the form
+    const formCard = document.querySelector('.form-card');
+    formCard.insertBefore(errorMessage, formCard.firstChild);
+
+    // Scroll to the first error
+    const firstErrorField = document.querySelector('.error');
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
-  if (!isValid && firstInvalidField) {
-    firstInvalidField.focus();
-    return false;
-  }
-
-  return true;
+  return isValid;
 }
 
 // Prepare form data for API submission
 function prepareFormData() {
+  // Get all form fields
+  const formFields = document.querySelectorAll('.form-input');
+  
+  // Create form data object matching the required format
   const formData = {
-    firstName: document.querySelector('input[placeholder="First Name"]').value,
-    lastName: document.querySelector('input[placeholder="Last Name"]').value,
-    email: document.querySelector('input[type="email"]').value,
-    projectName: document.querySelector('input[placeholder="Project Name"]').value,
-    patternName: document.querySelector('input[placeholder="Pattern Name"]').value,
-    designerName: document.querySelector('input[placeholder="Designer Name"]').value,
-    patternLink: document.querySelector('input[type="url"]').value,
+    firstName: formFields[0].value, // First name input
+    lastName: formFields[1].value,  // Last name input
+    email: formFields[2].value,     // Email input
+    projectName: formFields[3].value, // Project name input
+    patternName: formFields[4].value, // Pattern name input
+    designerName: formFields[5].value, // Designer name input
+    patternLink: formFields[6].value,  // Pattern link input
     product: {
-      id: selectedProduct.id,
+      shopifyId: selectedProduct.id,
       title: selectedProduct.title,
       handle: selectedProduct.handle,
+      options: selectedVariants,
       imageUrl: selectedProduct.image,
-      price: selectedProduct.price,
-      variantId: selectedProduct.variantId,
-      variantTitle: selectedProduct.variantTitle,
-      options: selectedVariants
+      price: selectedProduct.price
     },
     nameDisplay: document.querySelector('select[required]').value,
-    socialMedia: document.querySelector('input[placeholder="@username"]').value,
-    images: [] // Will be populated with uploaded images
+    socialMedia: formFields[7].value, // Social media handle input
+    images: Array.from(document.getElementById('file-upload').files).map(file => ({
+      url: URL.createObjectURL(file),
+      altText: file.name
+    }))
   };
 
   return formData;
@@ -1162,32 +1275,34 @@ function prepareFormData() {
 // Handle form submission
 async function handleSubmit(event) {
   event.preventDefault();
+  console.log(validateForm());
   
   if (!validateForm()) {
     return;
   }
+  console.log('validateForm', validateForm());
 
   const formData = prepareFormData();
   
-  const submitButton = event.target.querySelector('.submit');
-  submitButton.disabled = true;
-  submitButton.textContent = 'Submitting...';
+  // Get the submit button correctly
+  const submitButton = event.target.closest('.button-group').querySelector('.submit');
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Submitting...';
+  }
 
   try {
     const response = await fetch(`${API_PATH}/api/submissions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Shop-Domain': storeDomain
-      },
       body: JSON.stringify(formData)
     });
 
-    const result = await response.json();
-
     if (!response.ok) {
-      throw new Error(result.error || 'Failed to submit form');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to submit form');
     }
+
+    const result = await response.json();
 
     // Show success message
     const formCard = document.querySelector('.form-card');
@@ -1203,8 +1318,10 @@ async function handleSubmit(event) {
     errorMessage.className = 'error-message';
     errorMessage.textContent = `Error submitting form: ${error.message}`;
     document.querySelector('.form-card').prepend(errorMessage);
-    submitButton.disabled = false;
-    submitButton.textContent = 'Submit';
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Submit';
+    }
   }
 }
 </script>

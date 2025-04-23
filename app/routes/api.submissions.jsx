@@ -57,6 +57,20 @@ export async function loader({ request }) {
 // POST /api/submissions - Create a new submission
 export async function action({ request }) {
   try {
+    // Add CORS headers
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, PUT, DELETE, OPTIONS'
+    };
+
+    // Handle OPTIONS request for CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
+
     if (request.method === "POST") {
       const data = await request.json();
       
@@ -66,19 +80,14 @@ export async function action({ request }) {
         "lastName",
         "email",
         "projectName",
-        "patternName",
-        "designerName",
-        "patternLink",
-        "product",
         "nameDisplay",
-        "socialMedia",
       ];
 
       for (const field of requiredFields) {
         if (!data[field]) {
           return json(
             { error: `Missing required field: ${field}` },
-            { status: 400 }
+            { status: 400, headers: corsHeaders }
           );
         }
       }
@@ -86,12 +95,12 @@ export async function action({ request }) {
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email)) {
-        return json({ error: "Invalid email format" }, { status: 400 });
+        return json({ error: "Invalid email format" }, { status: 400, headers: corsHeaders });
       }
 
       // Validate product data
       if (!data.product || !data.product.shopifyId) {
-        return json({ error: "Invalid product data" }, { status: 400 });
+        return json({ error: "Invalid product data" }, { status: 400, headers: corsHeaders });
       }
 
       // Create submission
@@ -110,10 +119,7 @@ export async function action({ request }) {
               title: data.product.title,
               handle: data.product.handle,
               imageUrl: data.product.imageUrl,
-              price: data.product.price,
-              currency: data.product.currency,
-              variantId: data.product.variantId,
-              variantTitle: data.product.variantTitle,
+              price: parseFloat(data.product.price),
               selectedOption: JSON.stringify(data.product.options || {}),
             }
           },
@@ -136,7 +142,7 @@ export async function action({ request }) {
         },
       });
 
-      return json({ submission }, { status: 201 });
+      return json({ submission }, { status: 201, headers: corsHeaders });
     }
 
     // PUT /api/submissions/:id - Update submission status
@@ -146,16 +152,16 @@ export async function action({ request }) {
       const data = await request.json();
 
       if (!id) {
-        return json({ error: "Missing submission ID" }, { status: 400 });
+        return json({ error: "Missing submission ID" }, { status: 400, headers: corsHeaders });
       }
 
       if (!data.status) {
-        return json({ error: "Missing status" }, { status: 400 });
+        return json({ error: "Missing status" }, { status: 400, headers: corsHeaders });
       }
 
       const validStatuses = ["pending", "approved", "rejected"];
       if (!validStatuses.includes(data.status)) {
-        return json({ error: "Invalid status" }, { status: 400 });
+        return json({ error: "Invalid status" }, { status: 400, headers: corsHeaders });
       }
 
       const submission = await prisma.projectSubmission.update({
@@ -167,7 +173,7 @@ export async function action({ request }) {
         },
       });
 
-      return json({ submission });
+      return json({ submission }, { headers: corsHeaders });
     }
 
     // DELETE /api/submissions/:id - Delete a submission
@@ -176,19 +182,19 @@ export async function action({ request }) {
       const id = url.pathname.split("/").pop();
 
       if (!id) {
-        return json({ error: "Missing submission ID" }, { status: 400 });
+        return json({ error: "Missing submission ID" }, { status: 400, headers: corsHeaders });
       }
 
       await prisma.projectSubmission.delete({
         where: { id },
       });
 
-      return json({ success: true });
+      return json({ success: true }, { headers: corsHeaders });
     }
 
-    return json({ error: "Method not allowed" }, { status: 405 });
+    return json({ error: "Method not allowed" }, { status: 405, headers: corsHeaders });
   } catch (error) {
     console.error("Error processing submission:", error);
-    return json({ error: "Failed to process submission" }, { status: 500 });
+    return json({ error: "Failed to process submission" }, { status: 500, headers: corsHeaders });
   }
 } 
