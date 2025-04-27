@@ -1,9 +1,14 @@
 import { json } from "@remix-run/node";
 import  prisma  from "../db.server";
+import { authenticate } from "../shopify.server";
 
 // GET /api/submissions - Get all submissions with optional filters
 export async function loader({ request }) {
   try {
+    // current shop 
+    const data = await authenticate.admin(request);
+    console.log(data,'data')
+
     const url = new URL(request.url);
     const searchParams = url.searchParams;
     const query = searchParams.get("query") || "";
@@ -108,6 +113,7 @@ export async function action({ request }) {
         data: {
           firstName: data.firstName,
           lastName: data.lastName,
+          shop:data.shop,
           email: data.email,
           projectName: data.projectName,
           patternName: data.patternName,

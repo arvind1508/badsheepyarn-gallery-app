@@ -25,7 +25,6 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/submisstions">Submissions</Link>
-        <Link to="/app/submisstions/view">Submissions View</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>

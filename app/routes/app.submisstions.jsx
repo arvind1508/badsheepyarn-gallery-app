@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData, useSearchParams, Link, useNavigation, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -15,9 +15,11 @@ import {
   useIndexResourceState,
   ChoiceList,
   useBreakpoints,
+  Spinner,
+  EmptyState,
 } from "@shopify/polaris";
 import { useState, useCallback } from "react";
-import  prisma from "../db.server";
+import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
   const url = new URL(request.url);
@@ -39,7 +41,7 @@ export const loader = async ({ request }) => {
     }),
     ...(status !== "all" && { status }),
   };
-  console.log(where,'submissions')
+  console.log(where, 'submissions')
 
   const [submissions, total] = await Promise.all([
     prisma.projectSubmission.findMany({
@@ -69,6 +71,8 @@ export const loader = async ({ request }) => {
 
 export default function Submissions() {
   const { submissions, total, page, perPage, query, status, sortKey, sortDirection } = useLoaderData();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
   const [searchParams, setSearchParams] = useSearchParams();
   const { selectedResources, allResourcesSelected, handleSelectionChange } = useIndexResourceState(submissions);
   const [itemStrings, setItemStrings] = useState(["All", "Pending", "Approved", "Rejected"]);
@@ -207,6 +211,10 @@ export default function Submissions() {
     singular: "submission",
     plural: "submissions",
   };
+  const navigate = useNavigate();
+  const handleViewDetails = (id) => {
+    navigate(`/app/submissions/view/${id}`);
+  };
 
   const rowMarkup = submissions.map(
     ({ id, firstName, lastName, projectName, status, createdAt, product }, index) => (
@@ -224,7 +232,9 @@ export default function Submissions() {
         <IndexTable.Cell>{projectName}</IndexTable.Cell>
         <IndexTable.Cell>{product?.title || "No product selected"}</IndexTable.Cell>
         <IndexTable.Cell>
-          <Badge status={status === "approved" ? "success" : status === "rejected" ? "critical" : "warning"}>
+          <Badge tone={status === "approved" ? "success" : status === "rejected" ? "critical" : "warning"}
+            progress={status === "approved" ? "complete" : status === "rejected" ? "incomplete" : "partiallyComplete"}
+          >
             {status}
           </Badge>
         </IndexTable.Cell>
@@ -232,9 +242,11 @@ export default function Submissions() {
           {new Date(createdAt).toLocaleDateString()}
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <Button onClick={() => window.location.href = `/app/submissions/${id}`}>
-            View Details
-          </Button>
+          <IndexTable.Cell>
+            <Button onClick={() => handleViewDetails(id)} variant="primary">
+              View Details
+            </Button>
+          </IndexTable.Cell>
         </IndexTable.Cell>
       </IndexTable.Row>
     )
@@ -270,39 +282,62 @@ export default function Submissions() {
                 loading: false,
               }}
             />
-            <IndexTable
-              resourceName={resourceName}
-              itemCount={total}
-              selectedItemsCount={
-                allResourcesSelected ? "All" : selectedResources.length
-              }
-              onSelectionChange={handleSelectionChange}
-              headings={[
-                { title: "Name" },
-                { title: "Project" },
-                { title: "Product" },
-                { title: "Status" },
-                { title: "Date" },
-                { title: "Actions" },
-              ]}
-              pagination={
-                <Pagination
-                  hasNext={page * perPage < total}
-                  hasPrevious={page > 1}
-                  onNext={() => handlePagination(page + 1)}
-                  onPrevious={() => handlePagination(page - 1)}
-                  label={`${(page - 1) * perPage + 1}-${Math.min(
-                    page * perPage,
-                    total
-                  )} of ${total}`}
-                />
-              }
-            >
-              {rowMarkup}
-            </IndexTable>
+            {isLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                <Spinner size="large" />
+              </div>
+            ) : submissions.length === 0 ? (
+              <EmptyState
+                heading="No submissions found"
+                image=""
+              >
+                <p>Try changing your search terms or filters.</p>
+              </EmptyState>
+            ) : (
+              <IndexTable
+                resourceName={resourceName}
+                itemCount={total}
+                selectedItemsCount={
+                  allResourcesSelected ? "All" : selectedResources.length
+                }
+                onSelectionChange={handleSelectionChange}
+                headings={[
+                  { title: "Name" },
+                  { title: "Project" },
+                  { title: "Product" },
+                  { title: "Status" },
+                  { title: "Date" },
+                  { title: "Actions" },
+                ]}
+                pagination={
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      padding: '1rem 0'
+                    }}
+                  >
+                    <Pagination
+                      hasNext={page * perPage < total}
+                      hasPrevious={page > 1}
+                      onNext={() => handlePagination(page + 1)}
+                      onPrevious={() => handlePagination(page - 1)}
+                      label={`${(page - 1) * perPage + 1}-${Math.min(
+                        page * perPage,
+                        total
+                      )} of ${total}`}
+                    />
+
+                  </div>
+
+                }
+              >
+                {rowMarkup}
+              </IndexTable>
+            )}
           </Card>
         </Layout.Section>
       </Layout>
     </Page>
   );
-} 
+}

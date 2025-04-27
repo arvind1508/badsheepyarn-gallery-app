@@ -3,7 +3,7 @@
 client_id = "4694b10e7c877193823487855d19e601"
 name = "bad-ship-gallery"
 handle = "bad-ship-gallery"
-application_url = "https://normally-alt-park-usual.trycloudflare.com"
+application_url = "https://rated-keeping-post-issue.trycloudflare.com"
 embedded = true
 
 [build]
@@ -28,9 +28,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://normally-alt-park-usual.trycloudflare.com/auth/callback",
-  "https://normally-alt-park-usual.trycloudflare.com/auth/shopify/callback",
-  "https://normally-alt-park-usual.trycloudflare.com/api/auth/callback"
+  "https://rated-keeping-post-issue.trycloudflare.com/auth/callback",
+  "https://rated-keeping-post-issue.trycloudflare.com/auth/shopify/callback",
+  "https://rated-keeping-post-issue.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

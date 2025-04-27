@@ -87,7 +87,7 @@ model ProjectSubmission {
   updatedAt             DateTime       @updatedAt @db.Timestamp(6)
   images                ProjectImage[]
   product               Product        @relation(fields: [productId], references: [id])
-
+  shop                  String?
   @@index([email])
   @@index([status])
   @@index([productId])
@@ -109,6 +109,6 @@ model Product {
 
 enum ProjectStatus {
   PENDING
-  APPROVED
+  APPROVED  
   REJECTED
 }
