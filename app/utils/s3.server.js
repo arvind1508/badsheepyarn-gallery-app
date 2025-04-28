@@ -24,12 +24,11 @@ export const s3UploadHandler = async ({
     Body: stream,
     ContentType: contentType
   });
-  console.log("upload", upload);
 
-  await Promise.all([
+  const uploadResponse = await Promise.all([
     upload.promise(),
     writeAsyncIterableToWritable(data, stream)
   ]);
-
-  return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`;
+  console.log(uploadResponse[0])
+  return uploadResponse.length ? uploadResponse[0].Location : null
 };

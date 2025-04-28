@@ -4,6 +4,7 @@ import { searchProducts } from '../utils/productSearch';
 export async function loader({ request }) {
   const url = new URL(request.url);
   const query = url.searchParams.get('query');
+  const domain = url.searchParams.get('store');
 
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
@@ -29,7 +30,7 @@ export async function loader({ request }) {
   }
 
   try {
-    const response = await searchProducts(query);
+    const response = await searchProducts(query, domain);
     return json(response, {
       headers: {
         'Access-Control-Allow-Origin': '*',

@@ -30,9 +30,9 @@ const SEARCH_PRODUCTS_QUERY = `
   }
 `;
 
-export async function searchProducts(query) {
+export async function searchProducts(query,shop) {
   try {
-    const { domain, accessToken } = await getStoreCredentials();
+    const { domain, accessToken } = await getStoreCredentials(shop);
     
     const response = await fetch(`https://${domain}/admin/api/2024-01/graphql.json`, {
       method: 'POST',

@@ -20,12 +20,17 @@ import {
 } from "@shopify/polaris";
 import { useState, useCallback } from "react";
 import prisma from "../db.server";
+import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }) => {
+  
+  const { admin, session } = await authenticate.admin(request)
+
   const url = new URL(request.url);
   const searchParams = url.searchParams;
   const query = searchParams.get("query") || "";
   const status = searchParams.get("status") || "all";
+  const shop = session.shop || null
   const page = parseInt(searchParams.get("page") || "1");
   const sortKey = searchParams.get("sortKey") || "createdAt";
   const sortDirection = searchParams.get("sortDirection") || "desc";
@@ -40,6 +45,7 @@ export const loader = async ({ request }) => {
       ],
     }),
     ...(status !== "all" && { status }),
+   ...(shop && { shop }),
   };
   console.log(where, 'submissions')
 

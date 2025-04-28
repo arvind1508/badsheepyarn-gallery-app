@@ -186,6 +186,81 @@
   font-size: 1.5rem;
 }
 
+.image-preview-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.image-preview {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.file-upload.dragover {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+.file-upload-content {
+  text-align: center;
+}
+
+.file-upload-icon {
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 2rem;
+}
+
+.file-upload-text {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.file-upload-label {
+  color: #4f46e5;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.file-upload-label:hover {
+  color: #4338ca;
+}
+
+.file-upload-input {
+  display: none;
+}
+
+.file-upload-hint {
+  font-size: 1.5rem;
+}
+
 .product-results {
   max-height: 300px;
   overflow-y: auto;
@@ -790,7 +865,7 @@ let selectedVariants = {};
 let isLoading = false;
 let storeDomain = window.Shopify.shop;
 console.log(storeDomain);
-let API_PATH = 'https://normally-alt-park-usual.trycloudflare.com';
+let API_PATH = 'https://planned-apache-staying-wednesday.trycloudflare.com';
 
 
 function searchProducts(query) {
@@ -803,7 +878,7 @@ function searchProducts(query) {
   const resultsContainer = document.getElementById('product-results');
   resultsContainer.innerHTML = '<div class="loading-spinner"></div>';
 
-  fetch(`${API_PATH}/api/products/?query=${encodeURIComponent(query)}`)
+  fetch(`${API_PATH}/api/products/?query=${encodeURIComponent(query)}&store=${storeDomain}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
@@ -925,6 +1000,75 @@ function updateOptionSelection(optionName, value) {
     // Enable the next button if all options are selected
     const nextButton = document.querySelector(`.step[data-step="6"] .next-step`);
     nextButton.disabled = false;
+  }
+}
+
+let uploadedImages = [];
+let dragCounter = 0;
+
+function handleFiles(files) {
+  const fileUploadHint = document.querySelector('.file-upload-hint');
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  let validFiles = [];
+
+  // Create preview container if it doesn't exist
+  let previewContainer = document.querySelector('.image-preview-container');
+  if (!previewContainer) {
+    previewContainer = document.createElement('div');
+    previewContainer.className = 'image-preview-container';
+    document.querySelector('.file-upload').insertAdjacentElement('afterend', previewContainer);
+  }
+
+  Array.from(files).forEach(file => {
+    if (!validTypes.includes(file.type)) {
+      fileUploadHint.textContent = 'Invalid file type. Only PNG, JPG, GIF allowed.';
+      fileUploadHint.style.color = '#ef4444';
+      return;
+    }
+    if (file.size > maxSize) {
+      fileUploadHint.textContent = 'File too large. Maximum size is 10MB.';
+      fileUploadHint.style.color = '#ef4444';
+      return;
+    }
+    validFiles.push(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const preview = document.createElement('div');
+      preview.className = 'image-preview';
+      
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.innerHTML = '×';
+      removeBtn.onclick = () => {
+        uploadedImages = uploadedImages.filter(img => img !== file);
+        preview.remove();
+        updateFileUploadHint();
+      };
+
+      preview.appendChild(img);
+      preview.appendChild(removeBtn);
+      previewContainer.appendChild(preview);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  uploadedImages = [...uploadedImages, ...validFiles];
+  updateFileUploadHint();
+}
+
+function updateFileUploadHint() {
+  const fileUploadHint = document.querySelector('.file-upload-hint');
+  if (uploadedImages.length > 0) {
+    fileUploadHint.textContent = `${uploadedImages.length} file(s) selected`;
+    fileUploadHint.style.color = '#10b981';
+  } else {
+    fileUploadHint.textContent = 'PNG, JPG, GIF up to 10MB';
+    fileUploadHint.style.color = '';
   }
 }
 
@@ -1113,6 +1257,46 @@ document.addEventListener('DOMContentLoaded', function() {
   const secondaryColor = '{{ block.settings.secondary_color | default: "#e5e7eb" }}';
   setThemeColors(primaryColor, secondaryColor);
 
+  // Add drag and drop handlers
+  const fileUpload = document.querySelector('.file-upload');
+
+  fileUpload.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter++;
+    fileUpload.style.backgroundColor = 'rgba(79, 70, 229, 0.1)';
+  });
+
+  fileUpload.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter--;
+    if (dragCounter === 0) {
+      fileUpload.style.backgroundColor = '';
+    }
+  });
+
+  fileUpload.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  fileUpload.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter = 0;
+    fileUpload.style.backgroundColor = '';
+    
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(files);
+  });
+
+  // Add file input change handler
+  document.getElementById('file-upload').addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+  });
+
   // Add form submission handler
   const form = document.querySelector('.form-card');
   const submitButton = form.querySelector('.submit');
@@ -1253,6 +1437,7 @@ function prepareFormData() {
     patternName: formFields[4].value, // Pattern name input
     designerName: formFields[5].value, // Designer name input
     patternLink: formFields[6].value,  // Pattern link input
+    shop:storeDomain,
     product: {
       shopifyId: selectedProduct.id,
       title: selectedProduct.title,
@@ -1274,6 +1459,12 @@ function prepareFormData() {
 
 // Handle form submission
 async function handleSubmit(event) {
+  if (uploadedImages.length === 0) {
+    const fileUploadHint = document.querySelector('.file-upload-hint');
+    fileUploadHint.textContent = 'Please upload at least one image';
+    fileUploadHint.style.color = '#ef4444';
+    return;
+  }
   event.preventDefault();
   console.log(validateForm());
   
@@ -1281,6 +1472,31 @@ async function handleSubmit(event) {
     return;
   }
   console.log('validateForm', validateForm());
+
+  let formDataForImage = new FormData();
+  uploadedImages.forEach((file, index) => {
+    formDataForImage.append(`img`, file);
+  });
+
+  try {
+    const response = await fetch(`${API_PATH}/api/upload`, {
+      method: 'POST',
+      body: formDataForImage
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const result = await response.json();
+    console.log('Upload successful:', result);
+  } catch (error) {
+    console.error('Upload error:', error);
+    const fileUploadHint = document.querySelector('.file-upload-hint');
+    fileUploadHint.textContent = 'Failed to upload images. Please try again.';
+    fileUploadHint.style.color = '#ef4444';
+    return;
+  }
 
   const formData = prepareFormData();
   
