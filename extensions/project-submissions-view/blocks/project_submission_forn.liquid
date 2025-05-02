@@ -665,6 +665,42 @@ select.form-input {
   font-size: 1.75rem;
   color: #4b5563;
 }
+.tags-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tag-item input[type="checkbox"] {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  accent-color: var(--primary-color, #4f46e5);
+}
+
+.tag-item label {
+  font-size: 1.6rem;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tag-item:hover label {
+  color: var(--primary-color, #4f46e5);
+}
 </style>
 
 <div class="form-container">
@@ -737,10 +773,80 @@ select.form-input {
           <label class="form-label">Designer Name</label>
           <input type="text" class="form-input">
         </div>
+           <div class="form-group">
+          <label class="form-label">Select project categories that apply*</label>
+          <div class="tags-container">
+            <div class="tag-item">
+              <input type="checkbox" id="tag-socks" name="tags" value="Socks">
+              <label for="tag-socks">Socks</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-headware" name="tags" value="Headware">
+              <label for="tag-headware">Headware</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-shawls" name="tags" value="Shawls">
+              <label for="tag-shawls">Shawls</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-cowls" name="tags" value="Cowls">
+              <label for="tag-cowls">Cowls</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-blankets" name="tags" value="Blankets">
+              <label for="tag-blankets">Blankets</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-sweaters" name="tags" value="Sweaters">
+              <label for="tag-sweaters">Sweaters</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-mittens" name="tags" value="Mittens & Gloves">
+              <label for="tag-mittens">Mittens & Gloves</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-tops" name="tags" value="Tops">
+              <label for="tag-tops">Tops</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-babies" name="tags" value="Babies">
+              <label for="tag-babies">Babies</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-scarves" name="tags" value="Scarves">
+              <label for="tag-scarves">Scarves</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-ponchos" name="tags" value="Ponchos">
+              <label for="tag-ponchos">Ponchos</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-vests" name="tags" value="Vests">
+              <label for="tag-vests">Vests</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-wip" name="tags" value="WIP">
+              <label for="tag-wip">WIP</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-toys" name="tags" value="Toys">
+              <label for="tag-toys">Toys</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-decor" name="tags" value="Decor">
+              <label for="tag-decor">Decor</label>
+            </div>
+            <div class="tag-item">
+              <input type="checkbox" id="tag-wraps" name="tags" value="Wraps">
+              <label for="tag-wraps">Wraps</label>
+            </div>
+          </div>
+        </div>
         <div class="button-group">
           <button class="button button-secondary prev-step">Previous</button>
           <button class="button button-primary next-step">Next</button>
         </div>
+     
       </div>
 
       <!-- Step 5 -->
@@ -865,7 +971,7 @@ let selectedVariants = {};
 let isLoading = false;
 let storeDomain = window.Shopify.shop;
 console.log(storeDomain);
-let API_PATH = 'https://planned-apache-staying-wednesday.trycloudflare.com';
+let API_PATH = 'https://follow-startup-multiple-slow.trycloudflare.com';
 
 
 function searchProducts(query) {
@@ -1005,6 +1111,7 @@ function updateOptionSelection(optionName, value) {
 
 let uploadedImages = [];
 let dragCounter = 0;
+let uploadedImageUrls = [];
 
 function handleFiles(files) {
   const fileUploadHint = document.querySelector('.file-upload-hint');
@@ -1424,7 +1531,12 @@ function validateForm() {
 }
 
 // Prepare form data for API submission
-function prepareFormData() {
+function prepareFormData(images) {
+  console.log(`Preparing form data...`,
+    `Selected product: ${selectedProduct ? selectedProduct.title : 'None'}`,
+    `Selected variants: ${JSON.stringify(selectedVariants)}`,
+    `Uploaded images: ${images.length}`
+  );
   // Get all form fields
   const formFields = document.querySelectorAll('.form-input');
   
@@ -1448,16 +1560,47 @@ function prepareFormData() {
     },
     nameDisplay: document.querySelector('select[required]').value,
     socialMedia: formFields[7].value, // Social media handle input
-    images: Array.from(document.getElementById('file-upload').files).map(file => ({
-      url: URL.createObjectURL(file),
-      altText: file.name
-    }))
+    images: images
   };
 
   return formData;
 }
 
 // Handle form submission
+async function uploadImages() {
+  const uploadPromises = uploadedImages.map(async (file) => {
+    const formData = new FormData();
+    formData.append('img', file);
+
+    try {
+      const response = await fetch(`${API_PATH}/api/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      if (result.success && result.data.imageUrl) {
+        return result.data.imageUrl;
+      }
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error('Image upload error:', error);
+      throw error;
+    }
+  });
+
+  try {
+    uploadedImageUrls = await Promise.all(uploadPromises);
+    return uploadedImageUrls;
+  } catch (error) {
+    throw new Error('Failed to upload one or more images');
+  }
+}
+
 async function handleSubmit(event) {
   if (uploadedImages.length === 0) {
     const fileUploadHint = document.querySelector('.file-upload-hint');
@@ -1473,23 +1616,9 @@ async function handleSubmit(event) {
   }
   console.log('validateForm', validateForm());
 
-  let formDataForImage = new FormData();
-  uploadedImages.forEach((file, index) => {
-    formDataForImage.append(`img`, file);
-  });
-
   try {
-    const response = await fetch(`${API_PATH}/api/upload`, {
-      method: 'POST',
-      body: formDataForImage
-    });
-
-    if (!response.ok) {
-      throw new Error('Upload failed');
-    }
-
-    const result = await response.json();
-    console.log('Upload successful:', result);
+    const imageUrls = await uploadImages();
+    console.log('Upload successful:', imageUrls);
   } catch (error) {
     console.error('Upload error:', error);
     const fileUploadHint = document.querySelector('.file-upload-hint');
@@ -1497,8 +1626,12 @@ async function handleSubmit(event) {
     fileUploadHint.style.color = '#ef4444';
     return;
   }
+  const images = uploadedImageUrls.map(url => ({
+    url: url,
+    alt: `${url.split('/').pop()}`
+  }));
 
-  const formData = prepareFormData();
+  const formData = prepareFormData(images);
   
   // Get the submit button correctly
   const submitButton = event.target.closest('.button-group').querySelector('.submit');

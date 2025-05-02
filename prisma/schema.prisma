@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:admin@localhost:5432/badsheepyarn-app"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
