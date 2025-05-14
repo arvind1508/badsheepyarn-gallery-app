@@ -1,0 +1,1229 @@
+<style>
+  /* Font imports */
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+  /* Base font settings */
+  :root {
+    --font-primary: 'Montserrat', sans-serif;
+    --color-primary: #111827;
+    --color-secondary: #6b7280;
+    --color-background: #ffffff;
+    --color-hover: rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .project-gallery {
+    font-family: var(--font-primary);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .gallery-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .gallery-title {
+    font-family: var(--font-primary);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .gallery-description {
+    font-family: var(--font-primary);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--color-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Gallery masonry layout */
+  .masonry-grid {
+    column-count: 3;
+    column-gap: 10px;
+  }
+
+  .masonry-grid-item {
+    break-inside: avoid;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  /* Project card styling */
+  .project-card {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    display: block;
+  }
+
+  .project-image {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    display: block;
+  }
+
+  .project-image img {
+    width: 100%;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .project-card:hover .project-image img {
+    transform: scale(1.05);
+  }
+
+  /* Permanent info overlay styling (for some cards) */
+  .project-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px;
+  }
+
+  .project-info-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+
+  .project-info-creator {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  
+  .project-info-tags {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  
+  .project-info-tag {
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+
+  /* Hover overlay styling */
+  .project-content {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .project-card:hover .project-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .project-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+  }
+
+  .project-meta {
+    font-size: 0.95rem;
+    color: #e5e5e5;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-tags {
+    margin-bottom: 0.75rem;
+  }
+
+  .project-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2rem 0.7rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    color: white;
+    margin-right: 0.4rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .project-product {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .product-image {
+    width: 36px;
+    height: 36px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #f3f4f6;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-details {
+    flex: 1;
+  }
+
+  .product-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 0.1rem;
+  }
+
+  .product-variant {
+    font-size: 0.8rem;
+    color: #cccccc;
+  }
+
+  .category-filter {
+    margin-bottom: 3rem;
+  }
+  
+  .category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    padding: 0 1rem;
+  }
+
+  .category-item {
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9999px;
+    background-color: var(--color-background);
+    color: var(--color-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .category-item:hover {
+    background-color: var(--color-hover);
+    color: var(--color-primary);
+  }
+
+  .category-item.active {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+  }
+
+  /* Submit Project Button */
+  .submit-project-wrapper {
+    text-align: center;
+    margin: 3rem 0;
+  }
+  
+  .submit-project-btn {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: white;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .submit-project-btn:hover {
+    background-color: #000000;
+    transform: translateY(-2px);
+  }
+
+  /* Responsive styles */
+  @media (min-width: 992px) {
+    .masonry-grid {
+      column-count: 4; /* 4 columns on large screens */
+    }
+  }
+  
+  @media (max-width: 991px) {
+    .masonry-grid {
+      column-count: 3; /* 3 columns on medium screens */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .masonry-grid {
+      column-count: 2; /* 2 columns on small screens */
+    }
+    
+    .category-item {
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+    }
+    
+    .gallery-title {
+      font-size: 2.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .masonry-grid {
+      column-count: 1; /* 1 column on very small screens */
+    }
+    
+    .gallery-title {
+      font-size: 2rem;
+    }
+    
+    .gallery-description {
+      font-size: 1rem;
+    }
+
+    .load-more-container {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .load-more-btn, 
+    .load-less-btn {
+      width: 80%;
+      margin: 0.5rem 0;
+    }
+    
+    .load-less-btn {
+      margin-left: 0;
+    }
+  }
+
+  /* Sorting controls */
+  .sorting-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .sorting-label {
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-secondary);
+    margin-right: 0.75rem;
+    align-self: center;
+  }
+  
+  .sorting-select {
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1em;
+    cursor: pointer;
+  }
+  
+  .sorting-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+  }
+  
+  @media (max-width: 576px) {
+    .sorting-controls {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .sorting-label {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  /* Search controls */
+  .search-controls {
+    display: flex;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+  }
+  
+  .search-input {
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-secondary);
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .search-clear {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-secondary);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .search-input:not(:placeholder-shown) + .search-clear {
+    opacity: 1;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-secondary);
+    font-size: 1.1rem;
+  }
+  
+  /* Load More Button */
+  .load-more-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 3rem 0;
+  }
+  
+  .load-more-btn {
+    display: inline-block;
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--color-primary);
+    cursor: pointer;
+  }
+  
+  .load-more-btn:hover {
+    background-color: var(--color-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .load-more-btn.hidden {
+    display: none;
+  }
+
+  .load-less-btn {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--color-secondary);
+    font-family: var(--font-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid var(--color-secondary);
+    cursor: pointer;
+    margin-left: 1rem;
+  }
+  
+  .load-less-btn:hover {
+    background-color: var(--color-hover);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  
+  .load-more-btn.hidden,
+  .load-less-btn.hidden {
+    display: none;
+  }
+</style>
+
+<div class="project-gallery">
+  <div class="gallery-header">
+    <h1 class="gallery-title">{{ block.settings.title | escape }}</h1>
+    <p class="gallery-description">{{ block.settings.description | escape }}</p>
+  </div>
+  
+  <div class="submit-project-wrapper">
+    <a href="{{ block.settings.submit_button_link }}" class="submit-project-btn">{{ block.settings.submit_button_text | escape }}</a>
+  </div>
+  
+  <!-- Search bar -->
+  {% if block.settings.enable_search %}
+  <div class="search-controls">
+    <div class="search-input-wrapper">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input 
+        type="text" 
+        id="gallery-search" 
+        class="search-input" 
+        placeholder="Search projects, products, tags..."
+        aria-label="Search projects"
+      >
+      <button type="button" id="search-clear" class="search-clear" aria-label="Clear search">×</button>
+    </div>
+  </div>
+  {% endif %}
+  
+  <div class="category-filter">
+    <div class="category-list">
+      <button class="category-item active" data-category="all">All</button>
+      <button class="category-item" data-category="socks">Socks</button>
+      <button class="category-item" data-category="headware">Headware</button>
+      <button class="category-item" data-category="shawls">Shawls</button>
+      <button class="category-item" data-category="cowls">Cowls</button>
+      <button class="category-item" data-category="blankets">Blankets</button>
+      <button class="category-item" data-category="sweaters">Sweaters</button>
+      <button class="category-item" data-category="mittens-gloves">Mittens & Gloves</button>
+      <button class="category-item" data-category="tops">Tops</button>
+      <button class="category-item" data-category="babies">Babies</button>
+      <button class="category-item" data-category="scarves">Scarves</button>
+      <button class="category-item" data-category="ponchos">Ponchos</button>
+      <button class="category-item" data-category="vests">Vests</button>
+      <button class="category-item" data-category="wip">WIP</button>
+      <button class="category-item" data-category="toys">Toys</button>
+      <button class="category-item" data-category="decor">Decor</button>
+      <button class="category-item" data-category="wraps">Wraps</button>
+    </div>
+  </div>
+  
+  {% if block.settings.enable_sorting %}
+  <div class="sorting-controls">
+    <span class="sorting-label">Sort by:</span>
+    <select class="sorting-select" id="sort-select">
+      <option value="newest" {% if block.settings.default_sort == 'newest' %}selected{% endif %}>Newest First</option>
+      <option value="oldest" {% if block.settings.default_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+      <option value="popular" {% if block.settings.default_sort == 'popular' %}selected{% endif %}>Most Popular</option>
+      <option value="az" {% if block.settings.default_sort == 'az' %}selected{% endif %}>A-Z</option>
+      <option value="za" {% if block.settings.default_sort == 'za' %}selected{% endif %}>Z-A</option>
+    </select>
+  </div>
+  {% endif %}
+  
+  <div id="gallery-grid" class="masonry-grid">
+    <!-- Projects will be loaded here dynamically -->
+  </div>
+  
+  {% if block.settings.enable_load_more %}
+  <div class="load-more-container">
+    <button id="load-more-btn" class="load-more-btn">{{ block.settings.load_more_text | default: 'Load More Projects' }}</button>
+    <button id="load-less-btn" class="load-less-btn hidden">{{ block.settings.load_less_text | default: 'Show Less' }}</button>
+  </div>
+  {% endif %}
+  
+  <div class="submit-project-wrapper">
+    <a href="{{ block.settings.submit_button_link }}" class="submit-project-btn">{{ block.settings.submit_button_text | escape }}</a>
+  </div>
+</div>
+
+<script>
+const projectData = {
+  projects: [
+    {
+      projectName: "Purple Cable Socks",
+      firstName: "Sarah",
+      lastName: "Johnson",
+      nameDisplay: "first",
+      socialMedia: "@knittingadventures",
+      patternName: "Classic Cable Socks",
+      designerName: "Emma Wilson",
+      tags: ["Socks", "Cables"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/ccb3b135-09f6-4d41-afb5-ad3298ca6cbc/20240524_221120.jpg"],
+      product: {
+        title: "Bad Sheep Sock Yarn",
+        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/ccb3b135-09f6-4d41-afb5-ad3298ca6cbc/20240524_221120.jpg",
+        options: [["Color", "Purple Passion"], ["Weight", "Fingering"]]
+      },
+      dateAdded: "2023-11-15",
+      likes: 42
+    },
+    {
+      projectName: "Woodland Path Shawl",
+      firstName: "Emily",
+      lastName: "Davis",
+      nameDisplay: "first",
+      socialMedia: "@stitchcraft",
+      patternName: "Woodland Path Shawl",
+      designerName: "Maria Garcia",
+      tags: ["Shawls", "Texture"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/6f46c968-e1f1-4744-9b1c-4e5903f62231/Gail-P-2.jpg"],
+      product: {
+        title: "Bad Sheep Merino Sock",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Forest Green"], ["Weight", "Fingering"]]
+      },
+      dateAdded: "2023-10-22",
+      likes: 37
+    },
+    {
+      projectName: "Watermelon Cardigan",
+      firstName: "Jessica",
+      lastName: "Smith",
+      nameDisplay: "first",
+      socialMedia: "@yarnlover",
+      patternName: "Summer Fruit Cardigan",
+      designerName: "Lila Wong",
+      tags: ["Sweaters", "Colorwork"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/b758e650-bbfb-48ca-a1c1-ddae8527f74d/Watermelon-Cardi-finished.jpg"],
+      product: {
+        title: "Bad Sheep Worsted",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Watermelon & Lime"], ["Weight", "Worsted"]]
+      },
+      dateAdded: "2024-01-18",
+      likes: 85
+    },
+    {
+      projectName: "Cozy Cable Beanie",
+      firstName: "Michael",
+      lastName: "Brown",
+      nameDisplay: "first",
+      socialMedia: "@knitwithme",
+      patternName: "Alpine Twist Hat",
+      designerName: "Samantha Chen",
+      tags: ["Headware", "Cables"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg"],
+      product: {
+        title: "Bad Sheep DK",
+        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg",
+        options: [["Color", "Misty Morning"], ["Weight", "DK"]]
+      },
+      dateAdded: "2023-12-05",
+      likes: 29
+    },
+    {
+      projectName: "Rainbow Granny Blanket",
+      firstName: "Alex",
+      lastName: "Taylor",
+      nameDisplay: "first",
+      socialMedia: "@hookedoncrochet",
+      patternName: "Classic Granny Square Blanket",
+      designerName: "Elizabeth Cooper",
+      tags: ["Blankets", "Crochet"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/6f46c968-e1f1-4744-9b1c-4e5903f62231/Gail-P-2.jpg"],
+      product: {
+        title: "Bad Sheep Worsted Mini Set",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Rainbow Mix"], ["Weight", "Worsted"]]
+      },
+      dateAdded: "2024-02-10",
+      likes: 113
+    },
+    {
+      projectName: "Autumn Leaves Wrap",
+      firstName: "Olivia",
+      lastName: "Clark",
+      nameDisplay: "first",
+      socialMedia: "@craftystitcher",
+      patternName: "Fall Foliage Wrap",
+      designerName: "David Wilson",
+      tags: ["Wraps", "Lace"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/b758e650-bbfb-48ca-a1c1-ddae8527f74d/Watermelon-Cardi-finished.jpg"],
+      product: {
+        title: "Bad Sheep Fingering",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Autumn Blend"], ["Weight", "Fingering"]]
+      },
+      dateAdded: "2023-09-17",
+      likes: 67
+    },
+    {
+      projectName: "Fisherman's Rib Cowl",
+      firstName: "Daniel",
+      lastName: "Miller",
+      nameDisplay: "first",
+      socialMedia: "@knittingdad",
+      patternName: "Seaside Cowl",
+      designerName: "Rachel Kim",
+      tags: ["Cowls", "Texture"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg"],
+      product: {
+        title: "Bad Sheep Bulky",
+        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg",
+        options: [["Color", "Sea Foam"], ["Weight", "Bulky"]]
+      },
+      dateAdded: "2023-08-30",
+      likes: 51
+    },
+    {
+      projectName: "Colorblock Baby Blanket",
+      firstName: "Sophie",
+      lastName: "Wilson",
+      nameDisplay: "first",
+      socialMedia: "@yarncrafts",
+      patternName: "Modern Baby Blanket",
+      designerName: "James Garcia",
+      tags: ["Blankets", "Babies"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/6f46c968-e1f1-4744-9b1c-4e5903f62231/Gail-P-2.jpg"],
+      product: {
+        title: "Bad Sheep DK",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Pastel Collection"], ["Weight", "DK"]]
+      },
+      dateAdded: "2024-01-05",
+      likes: 73
+    },
+    {
+      projectName: "Lace Summer Top",
+      firstName: "Hannah",
+      lastName: "Lee",
+      nameDisplay: "first",
+      socialMedia: "@hannahknits",
+      patternName: "Breeze Top",
+      designerName: "Nicole Chen",
+      tags: ["Tops", "Lace"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/b758e650-bbfb-48ca-a1c1-ddae8527f74d/Watermelon-Cardi-finished.jpg"],
+      product: {
+        title: "Bad Sheep Sport",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Sage"], ["Weight", "Sport"]]
+      },
+      dateAdded: "2023-07-22",
+      likes: 94
+    },
+    {
+      projectName: "Knit Watermelon Dress",
+      firstName: "Lily",
+      lastName: "Roberts",
+      nameDisplay: "first",
+      socialMedia: "@lilystitch",
+      patternName: "Summer Fruit Dress",
+      designerName: "Emma Parker",
+      tags: ["Babies", "Colorwork"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/c0cb9829-a866-44e8-99de-16165c0afb6c/Dora-O-3.jpg"],
+      product: {
+        title: "Bad Sheep Worsted",
+        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
+        options: [["Color", "Watermelon & Lime"], ["Weight", "Worsted"]]
+      },
+      dateAdded: "2023-03-15",
+      likes: 128
+    },
+    {
+      projectName: "Colorful Scarf",
+      firstName: "Tina",
+      lastName: "Wong",
+      nameDisplay: "first",
+      socialMedia: "@tinaknits",
+      patternName: "Rainbow Path Scarf",
+      designerName: "David Turner",
+      tags: ["Scarves", "Colorwork"],
+      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/2e597306-83f0-4b2e-b091-082e6d67785c/Gloria-M.jpg"],
+      product: {
+        title: "Bad Sheep Minis Set",
+        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/2e597306-83f0-4b2e-b091-082e6d67785c/Gloria-M.jpg", 
+        options: [["Color", "Rainbow Collection"], ["Weight", "Fingering"]]
+      },
+      dateAdded: "2024-02-28",
+      likes: 45
+    }
+  ],
+  currentCategory: 'all',
+  currentSortOption: 'newest',
+  searchTerm: '',
+  batchSize: {{ block.settings.batch_size | default: 3 }},
+  currentIndex: 0
+};
+
+// Template for project card
+function createProjectCard(project, index) {
+  // Show permanent info overlay on some cards (like in screenshot)
+  const showInfoOverlay = [2, 5, 7, 10].includes(index);
+  
+  return `
+    <div class="masonry-grid-item" data-category="${project.tags.map(tag => tag.toLowerCase().replace(' ', '-')).join(' ')}">
+      <div class="project-card">
+        <div class="project-image">
+          <img 
+            src="${project.images[0]}" 
+            alt="${project.projectName}"
+            loading="lazy"
+          >
+          ${showInfoOverlay ? `
+          <div class="project-info-overlay">
+            <div class="project-info-title">${project.projectName}</div>
+            <div class="project-info-creator">by ${project.firstName} ${project.socialMedia ? `• ${project.socialMedia}` : ''}</div>
+            ${project.tags ? `
+            <div class="project-info-tags">
+              ${project.tags.slice(0, 2).map(tag => `<span class="project-info-tag">${tag}</span>`).join('')}
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+        </div>
+        ${!showInfoOverlay ? `
+        <div class="project-content">
+          <div class="project-title">${project.projectName}</div>
+          <div class="project-meta">
+            ${getDisplayName(project)}
+            ${project.socialMedia ? `• ${project.socialMedia}` : ''}
+          </div>
+          ${project.tags ? `
+            <div class="project-tags">
+              ${project.tags.map(tag => `<span class="project-tag">${tag}</span>`).join('')}
+            </div>
+          ` : ''}
+          ${project.patternName ? `
+            <div class="project-meta">Pattern: ${project.patternName}${project.designerName ? ` by ${project.designerName}` : ''}</div>
+          ` : ''}
+          <div class="project-product">
+            <div class="product-image">
+              <img 
+                src="${project.product.imageUrl}" 
+                alt="${project.product.title}"
+                loading="lazy"
+              >
+            </div>
+            <div class="product-details">
+              <div class="product-title">${project.product.title}</div>
+              ${project.product.options ? `
+                <div class="product-variant">
+                  ${project.product.options.map(option => `${option[0]}: ${option[1]}`).join(', ')}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// Helper function to get display name based on nameDisplay setting
+function getDisplayName(project) {
+  switch(project.nameDisplay) {
+    case 'full':
+      return `by ${project.firstName} ${project.lastName}`;
+    case 'first':
+      return `by ${project.firstName}`;
+    case 'initials':
+      return `by ${project.firstName[0]}${project.lastName[0]}`;
+    default:
+      return 'by Anonymous';
+  }
+}
+
+// Sort projects based on the selected option
+function sortProjects(projects, sortOption) {
+  const sortedProjects = [...projects]; // Create a copy to avoid modifying the original
+  
+  switch(sortOption) {
+    case 'newest':
+      return sortedProjects.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+    case 'oldest':
+      return sortedProjects.sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
+    case 'popular':
+      return sortedProjects.sort((a, b) => b.likes - a.likes);
+    case 'az':
+      return sortedProjects.sort((a, b) => a.projectName.localeCompare(b.projectName));
+    case 'za':
+      return sortedProjects.sort((a, b) => b.projectName.localeCompare(a.projectName));
+    default:
+      return sortedProjects;
+  }
+}
+
+// Render projects based on current category and sorting option
+function renderProjects(loadMore = false, loadLess = false) {
+  const galleryGrid = document.getElementById('gallery-grid');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const loadLessBtn = document.getElementById('load-less-btn');
+  
+  if (!galleryGrid) return;
+
+  // Store the original/previous index before any resets (for load less functionality)
+  const previousIndex = projectData.currentIndex;
+
+  // If loading less, set current index back to initial batch
+  if (loadLess) {
+    projectData.currentIndex = 0;
+    galleryGrid.innerHTML = '';
+  }
+  // If not loading more, reset the current index and clear the grid 
+  else if (!loadMore) {
+    projectData.currentIndex = 0;
+    galleryGrid.innerHTML = '';
+  }
+
+  // Filter by category
+  let filteredProjects = projectData.currentCategory === 'all' 
+    ? projectData.projects 
+    : projectData.projects.filter(project => 
+        project.tags.some(tag => 
+          tag.toLowerCase().replace(' ', '-') === projectData.currentCategory
+        )
+      );
+  
+  // Filter by search term if it exists
+  const searchTerm = projectData.searchTerm || '';
+  if (searchTerm) {
+    filteredProjects = filteredProjects.filter(project => {
+      const projectNameMatch = project.projectName && 
+        project.projectName.toLowerCase().includes(searchTerm);
+      const productMatch = project.product && 
+        project.product.title.toLowerCase().includes(searchTerm);
+      const patternMatch = project.patternName && 
+        project.patternName.toLowerCase().includes(searchTerm);
+      const designerMatch = project.designerName && 
+        project.designerName.toLowerCase().includes(searchTerm);
+        
+      // Check tags
+      let tagMatch = false;
+      if (project.tags && Array.isArray(project.tags)) {
+        tagMatch = project.tags.some(tag => 
+          tag.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      return projectNameMatch || productMatch || tagMatch || designerMatch || patternMatch;
+    });
+  }
+  
+  // Sort the filtered projects
+  filteredProjects = sortProjects(filteredProjects, projectData.currentSortOption);
+
+  // Handle no results
+  if (filteredProjects.length === 0) {
+    galleryGrid.innerHTML = '<div class="no-results">No projects found matching your search</div>';
+    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+    if (loadLessBtn) loadLessBtn.classList.add('hidden');
+    return;
+  }
+  
+  // If load more/less is disabled, show all projects at once
+  if (!loadMoreBtn) {
+    galleryGrid.innerHTML = filteredProjects.map((project, index) => 
+      createProjectCard(project, index)
+    ).join('');
+    return;
+  }
+  
+  // Get current batch of projects
+  const startIndex = projectData.currentIndex;
+  const endIndex = Math.min(startIndex + projectData.batchSize, filteredProjects.length);
+  const currentBatch = filteredProjects.slice(startIndex, endIndex);
+  
+  // Create and append project cards
+  const projectsHTML = currentBatch.map((project, index) => 
+    createProjectCard(project, startIndex + index)
+  ).join('');
+  
+  // Append new projects to existing ones if loading more
+  galleryGrid.innerHTML += projectsHTML;
+  
+  // Update current index
+  projectData.currentIndex = endIndex;
+  
+  // Show or hide load more button
+  if (projectData.currentIndex >= filteredProjects.length) {
+    loadMoreBtn.classList.add('hidden');
+  } else {
+    loadMoreBtn.classList.remove('hidden');
+  }
+  
+  // Show load less button if we've loaded more than the initial batch
+  if (projectData.currentIndex > projectData.batchSize) {
+    loadLessBtn.classList.remove('hidden');
+  } else {
+    loadLessBtn.classList.add('hidden');
+  }
+}
+
+// Handle category filter clicks
+function setupCategoryFilters() {
+  document.querySelectorAll('.category-item').forEach(button => {
+    button.addEventListener('click', () => {
+      // Update active state
+      document.querySelector('.category-item.active').classList.remove('active');
+      button.classList.add('active');
+      
+      // Update current category and re-render
+      projectData.currentCategory = button.dataset.category;
+      renderProjects();
+    });
+  });
+}
+
+// Setup sorting dropdown
+function setupSorting() {
+  const sortSelect = document.getElementById('sort-select');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      projectData.currentSortOption = sortSelect.value;
+      renderProjects();
+    });
+  }
+}
+
+// Initialize gallery
+document.addEventListener('DOMContentLoaded', function() {
+  // Get the sort select element if it exists
+  const sortSelect = document.getElementById('sort-select');
+  if (sortSelect) {
+    projectData.currentSortOption = sortSelect.value;
+  }
+  
+  // Get search elements if search is enabled
+  const searchInput = document.getElementById('gallery-search');
+  const clearButton = document.getElementById('search-clear');
+  
+  if (searchInput && clearButton) {
+    // Set up search functionality
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase().trim();
+      handleSearch(searchTerm);
+    });
+    
+    // Clear search button
+    clearButton.addEventListener('click', function() {
+      searchInput.value = '';
+      handleSearch('');
+      this.style.display = 'none';
+    });
+    
+    // Show/hide clear button based on input
+    searchInput.addEventListener('input', function() {
+      clearButton.style.display = this.value ? 'block' : 'none';
+    });
+  }
+  
+  // Set up category filter
+  setupCategoryFilters();
+  
+  // Set up sorting
+  setupSorting();
+  
+  // Set up load more button
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const loadLessBtn = document.getElementById('load-less-btn');
+  
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', function() {
+      renderProjects(true); // true indicates we're loading more
+    });
+  }
+  
+  if (loadLessBtn) {
+    loadLessBtn.addEventListener('click', function() {
+      renderProjects(false, true); // second param true indicates we're loading less
+      
+      // Smooth scroll to the top of the gallery
+      document.querySelector('.project-gallery').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
+  }
+  
+  // Load initial project data
+  renderProjects();
+});
+
+// Handle search functionality
+function handleSearch(searchTerm) {
+  projectData.searchTerm = searchTerm;
+  renderProjects();
+  
+  // Show or hide no results message
+  const noResultsElement = document.querySelector('.no-results');
+  if (noResultsElement) {
+    if (document.querySelectorAll('.masonry-item:not(.hidden)').length === 0) {
+      noResultsElement.style.display = 'block';
+    } else {
+      noResultsElement.style.display = 'none';
+    }
+  }
+}
+</script>
+
+<!-- No need for masonry.js or imagesloaded since we're using CSS columns -->
+<!-- <script type="text/javascript" src="{{ 'masonry.pkgd.min.js' | asset_url }}" defer></script> -->
+<!-- <script type="text/javascript" src="{{ 'imagesloaded.pkgd.min.js' | asset_url }}" defer></script> -->
+
+{% schema %}
+{
+  "name": "Project Gallery",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Project Gallery"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Gallery Description",
+      "default": "This page has a collection of amazing knit and crochet projects made by the Bad Sheep Yarn community. You can find the yarn they used, the link to the pattern, and notes or comments about the project."
+    },
+    {
+      "type": "text",
+      "id": "submit_button_text",
+      "label": "Submit Button Text",
+      "default": "Submit Your Project"
+    },
+    {
+      "type": "url",
+      "id": "submit_button_link",
+      "label": "Submit Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Sorting Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "Enable Sorting",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "default_sort",
+      "label": "Default Sort Order",
+      "options": [
+        {
+          "value": "newest",
+          "label": "Newest First"
+        },
+        {
+          "value": "oldest",
+          "label": "Oldest First"
+        },
+        {
+          "value": "popular",
+          "label": "Most Popular"
+        },
+        {
+          "value": "az",
+          "label": "Alphabetically (A-Z)"
+        },
+        {
+          "value": "za",
+          "label": "Alphabetically (Z-A)"
+        }
+      ],
+      "default": "newest"
+    },
+    {
+      "type": "header",
+      "content": "Search Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_search",
+      "label": "Enable Search",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Display Options"
+    },
+    {
+      "type": "range",
+      "id": "batch_size",
+      "min": 3,
+      "max": 24,
+      "step": 3,
+      "label": "Projects Per Page",
+      "info": "Number of projects to show before 'Load More' button",
+      "default": 9
+    },
+    {
+      "type": "header",
+      "content": "Load More Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_load_more",
+      "label": "Enable Load More",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "load_more_text",
+      "label": "Load More Text",
+      "default": "Load More Projects"
+    },
+    {
+      "type": "text",
+      "id": "load_less_text",
+      "label": "Load Less Text",
+      "default": "Show Less"
+    }
+  ]
+}
+{% endschema %}
+

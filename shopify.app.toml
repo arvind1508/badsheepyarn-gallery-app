@@ -3,7 +3,7 @@
 client_id = "4694b10e7c877193823487855d19e601"
 name = "bad-ship-gallery"
 handle = "bad-ship-gallery"
-application_url = "https://scientists-entirely-nominations-contractors.trycloudflare.com"
+application_url = "https://please-cards-hepatitis-hk.trycloudflare.com"
 embedded = true
 
 [build]
@@ -28,9 +28,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://scientists-entirely-nominations-contractors.trycloudflare.com/auth/callback",
-  "https://scientists-entirely-nominations-contractors.trycloudflare.com/auth/shopify/callback",
-  "https://scientists-entirely-nominations-contractors.trycloudflare.com/api/auth/callback"
+  "https://please-cards-hepatitis-hk.trycloudflare.com/auth/callback",
+  "https://please-cards-hepatitis-hk.trycloudflare.com/auth/shopify/callback",
+  "https://please-cards-hepatitis-hk.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
