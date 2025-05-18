@@ -48,6 +48,13 @@
   .masonry-grid {
     column-count: 3;
     column-gap: 10px;
+    min-height: 200px; /* Ensure there's space for messages */
+    position: relative; /* For absolute positioning of messages */
+  }
+
+  .masonry-grid.empty {
+    display: block;
+    height: auto;
   }
 
   .masonry-grid-item {
@@ -79,6 +86,96 @@
 
   .project-card:hover .project-image img {
     transform: scale(1.05);
+  }
+
+  /* Skeleton loading styles */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .skeleton-item {
+    display: block;
+    width: 100%;
+  }
+
+  .project-card.skeleton {
+    background: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .skeleton-image {
+    width: 100%;
+    height: 260px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  .skeleton-content {
+    padding: 1rem;
+    background: #fff;
+  }
+
+  .skeleton-title {
+    width: 80%;
+    height: 20px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 4px;
+  }
+
+  .skeleton-meta {
+    width: 60%;
+    height: 15px;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 4px;
+  }
+
+  .skeleton-tags {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .skeleton-tag {
+    width: 60px;
+    height: 20px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 20px;
+  }
+
+  .skeleton-product {
+    width: 90%;
+    height: 30px;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 4px;
+  }
+
+  .skeleton-button {
+    width: 60%;
+    height: 36px;
+    margin: 15px auto 0;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 4px;
   }
 
   /* Permanent info overlay styling (for some cards) */
@@ -119,7 +216,7 @@
   /* Hover overlay styling */
   .project-content {
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.7);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.3));
     z-index: 2;
     position: absolute;
     bottom: 0;
@@ -129,6 +226,9 @@
     opacity: 0;
     transform: translateY(100%);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    max-height: 85%;
+    overflow-y: auto;
   }
 
   .project-card:hover .project-content {
@@ -139,45 +239,51 @@
   .project-title {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   .project-meta {
-    font-size: 0.95rem;
-    color: #e5e5e5;
+    font-size: 0.9rem;
+    color: #ffffff;
     margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
   }
 
   .project-tags {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2rem;
   }
 
   .project-tag {
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 500;
-    padding: 0.2rem 0.7rem;
+    padding: 0.15rem 0.5rem;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 9999px;
     color: white;
-    margin-right: 0.4rem;
-    margin-bottom: 0.2rem;
   }
 
   .project-product {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
+    gap: 0.5rem;
+    margin: 0.5rem auto;
+    max-width: 90%;
   }
 
   .product-image {
-    width: 36px;
-    height: 36px;
-    border-radius: 0.5rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 0.3rem;
     overflow: hidden;
     background: #f3f4f6;
+    flex-shrink: 0;
   }
 
   .product-image img {
@@ -188,18 +294,41 @@
 
   .product-details {
     flex: 1;
+    text-align: left;
   }
 
   .product-title {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     font-weight: 500;
-    color: #ffffff;
+    color: rgb(34, 145, 145) !important;
     margin-bottom: 0.1rem;
   }
 
   .product-variant {
-    font-size: 0.8rem;
-    color: #cccccc;
+    font-size: 0.7rem;
+    color: #e0e0e0;
+  }
+
+  .view-project-btn {
+    display: inline-block;
+    background-color: #0066cc;
+    color: white;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .view-project-btn:hover {
+    background-color: #0052a3;
+    transform: translateY(-2px);
   }
 
   .category-filter {
@@ -227,6 +356,12 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
+  .category-count {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-left: 3px;
+  }
+
   .category-item:hover {
     background-color: var(--color-hover);
     color: var(--color-primary);
@@ -236,6 +371,35 @@
     background-color: var(--color-primary);
     color: var(--color-background);
     border-color: var(--color-primary);
+  }
+
+  .category-item.loading {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .category-item.loading::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.6) 50%, 
+      transparent 100%
+    );
+    animation: shimmer-button 1.5s infinite;
+  }
+  
+  @keyframes shimmer-button {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   /* Submit Project Button */
@@ -440,6 +604,39 @@
     padding: 3rem 1rem;
     color: var(--color-secondary);
     font-size: 1.1rem;
+    margin: 3rem auto;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    max-width: 500px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+  }
+  
+  .no-results p {
+    margin: 0.5rem 0;
+  }
+  
+  .no-results p:first-child {
+    font-weight: 500;
+    font-size: 1.2rem;
+    color: var(--color-primary);
+  }
+  
+  .no-results-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+  }
+  
+  .no-results .view-project-btn {
+    margin-top: 1.5rem;
   }
   
   /* Load More Button */
@@ -503,6 +700,582 @@
   .load-less-btn.hidden {
     display: none;
   }
+
+  /* Fixed Lightbox Base Styles */
+  .gallery-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+  
+  .gallery-lightbox.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Apply to the lightbox content */
+  .gallery-lightbox .lightbox-content {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    max-width: 1200px;
+    height: 70vh;
+    max-height: 900px;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    margin: auto;
+    overflow-y: auto;
+    min-height: 0; /* ✅ Add this */
+    top: 400px;
+    max-height: calc(100vh - 200px); /* Ensure it doesn't go off-screen */
+  }
+  
+
+  .lightbox-main {
+    display: flex;
+    flex: 1 1 auto;
+    gap: 30px;
+    padding: 20px;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+  
+ 
+.lightbox-image-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8f8f8;
+  overflow: hidden;
+  border-radius: 5px;
+  min-width: 0;
+  height: 100%; /* ✅ Make it match the details panel height */
+}
+  
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+  
+.lightbox-details {
+  flex: 0 0 320px;
+  max-width: 350px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 5px;
+  min-width: 0;
+  height: 100%; /* ✅ Key to keeping everything aligned */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+  
+  .lightbox-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s ease;
+  }
+  
+  .lightbox-close:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
+  }
+  
+  /* Fixed navigation buttons - ensure consistent placement */
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 1;
+    z-index: 1001;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .lightbox-nav:hover {
+    background-color: #fff;
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  .lightbox-prev {
+    left: 15px;
+  }
+  
+  .lightbox-next {
+    right: 15px;
+  }
+  
+  .lightbox-caption {
+    text-align: center;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #666;
+    font-size: 14px;
+    border-top: 1px solid #eee;
+  }
+  
+  .project-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #fff;
+  }
+  
+  .project-creator {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #555;
+  }
+  
+  /* Fix project navigation buttons */
+  .lightbox-nav-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 0;
+    background-color: #f8f8f8;
+    border-top: 1px solid #e0e0e0;
+    width: 100%;
+    flex-shrink: 0;
+    height: 60px;
+  }
+  
+  .project-nav-btn {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .project-nav-btn:hover {
+    background-color: #0052a3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Fix image counter display */
+  .image-counter {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    z-index: 1001;
+  }
+
+  /* Media query breakpoints - more detailed for better responsiveness */
+  @media (max-width: 1200px) {
+    .gallery-lightbox .lightbox-content {
+      width: 92%;
+      height: 88vh;
+    }
+    
+    .lightbox-details {
+      flex: 0 0 280px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .gallery-lightbox .lightbox-content {
+      width: 95%;
+      height: 90vh;
+    }
+    
+    .lightbox-details {
+      flex: 0 0 250px;
+      padding: 15px;
+    }
+    
+    .lightbox-main {
+      padding: 15px;
+      gap: 20px;
+    }
+  }
+
+  /* Improved responsive styles for tablet */
+  @media (max-width: 768px) {
+    .gallery-lightbox .lightbox-content {
+      width: 95%;
+      height: 90vh;
+      max-height: 90vh;
+    }
+    
+    .lightbox-main {
+      flex-direction: column;
+      padding: 15px;
+      gap: 15px;
+      overflow-y: auto;
+    }
+    
+    .lightbox-image-container {
+      flex: 0 0 auto;
+      width: 100%;
+      aspect-ratio: 3/2;
+      min-height: auto;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    
+    .lightbox-details {
+      flex: 0 0 auto;
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+      max-height: 45%;
+      padding: 15px;
+      overflow-y: auto;
+    }
+  }
+
+  /* Small tablets and large phones */
+  @media (max-width: 600px) {
+    .gallery-lightbox .lightbox-content {
+      width: 100%;
+      height: 100vh;
+      max-height: 100vh;
+      border-radius: 0;
+      margin: 0;
+    }
+    
+    .lightbox-main {
+      padding: 12px;
+      gap: 12px;
+      height: calc(100% - 70px);
+    }
+    
+    .lightbox-image-container {
+      aspect-ratio: 1/1;
+    }
+    
+    .lightbox-details {
+      height: auto;
+      max-height: 48%;
+      padding: 10px 15px;
+    }
+    
+    .project-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+  }
+
+  /* Mobile phones */
+  @media (max-width: 480px) {
+    .lightbox-main {
+      padding: 10px;
+      gap: 10px;
+    }
+    
+    .lightbox-details {
+      max-height: 50%;
+      padding: 10px;
+    }
+    
+    .project-title {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+    
+    .project-creator {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    
+    .lightbox-nav {
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+    }
+    
+    .lightbox-close {
+      width: 36px;
+      height: 36px;
+      font-size: 20px;
+      top: 10px;
+      right: 10px;
+    }
+    
+    .project-nav-btn {
+      font-size: 0.8rem;
+      padding: 8px 12px;
+    }
+  }
+
+  /* Extra small screens and landscape orientation on phones */
+  @media (max-width: 380px), (max-height: 600px) {
+    .lightbox-image-container {
+      height: 35%;
+      min-height: 150px;
+    }
+    
+    .lightbox-details {
+      max-height: 55%;
+    }
+    
+    .project-title {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    
+    .project-creator {
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+    
+    .lightbox-nav-controls {
+      padding: 8px 0;
+      height: 50px;
+    }
+    
+    .project-nav-btn {
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Multi-image indicator */
+  .multi-image-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+  }
+  
+  .multi-image-badge svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+  }
+
+  .project-image {
+    cursor: pointer;
+    position: relative;
+  }
+
+  /* Loading indicator styles */
+  .loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #0066cc;
+    animation: spin 1s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  .loading-spinner.active {
+    display: block;
+  }
+  
+  /* Page loading indicator styles */
+  .loading-indicator {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-secondary);
+    margin: 3rem auto;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    max-width: 500px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+  }
+  
+  .loading-indicator p {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+  }
+  
+  .loading-indicator .loading-spinner {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--color-primary);
+    animation: rotate 1s ease-in-out infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes rotate {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Expand image button */
+  .expand-image-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.7);
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .expand-image-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+  }
+
+  /* Expanded view styles */
+  .expanded-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+  
+  .expanded-view.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .expanded-image-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .expanded-image {
+    max-width: 100%;
+    max-height: calc(100vh - 40px);
+    height: auto !important;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .expanded-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1101;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .expanded-close:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+
+  /* Ensure thumbnails are hidden */
+  .thumbnail, .thumbnail.active, .thumbnail img, .thumbnail:hover {
+    display: none;
+  }
+
+  .lightbox-image.fade-out {
+    opacity: 0;
+  }
 </style>
 
 <div class="project-gallery">
@@ -537,23 +1310,23 @@
   
   <div class="category-filter">
     <div class="category-list">
-      <button class="category-item active" data-category="all">All</button>
-      <button class="category-item" data-category="socks">Socks</button>
-      <button class="category-item" data-category="headware">Headware</button>
-      <button class="category-item" data-category="shawls">Shawls</button>
-      <button class="category-item" data-category="cowls">Cowls</button>
-      <button class="category-item" data-category="blankets">Blankets</button>
-      <button class="category-item" data-category="sweaters">Sweaters</button>
-      <button class="category-item" data-category="mittens-gloves">Mittens & Gloves</button>
-      <button class="category-item" data-category="tops">Tops</button>
-      <button class="category-item" data-category="babies">Babies</button>
-      <button class="category-item" data-category="scarves">Scarves</button>
-      <button class="category-item" data-category="ponchos">Ponchos</button>
-      <button class="category-item" data-category="vests">Vests</button>
-      <button class="category-item" data-category="wip">WIP</button>
-      <button class="category-item" data-category="toys">Toys</button>
-      <button class="category-item" data-category="decor">Decor</button>
-      <button class="category-item" data-category="wraps">Wraps</button>
+      <button class="category-item active" data-category="all">All <span class="category-count"></span></button>
+      <button class="category-item" data-category="socks">Socks <span class="category-count"></span></button>
+      <button class="category-item" data-category="headware">Headware <span class="category-count"></span></button>
+      <button class="category-item" data-category="shawls">Shawls <span class="category-count"></span></button>
+      <button class="category-item" data-category="cowls">Cowls <span class="category-count"></span></button>
+      <button class="category-item" data-category="blankets">Blankets <span class="category-count"></span></button>
+      <button class="category-item" data-category="sweaters">Sweaters <span class="category-count"></span></button>
+      <button class="category-item" data-category="mittens-gloves">Mittens & Gloves <span class="category-count"></span></button>
+      <button class="category-item" data-category="tops">Tops <span class="category-count"></span></button>
+      <button class="category-item" data-category="babies">Babies <span class="category-count"></span></button>
+      <button class="category-item" data-category="scarves">Scarves <span class="category-count"></span></button>
+      <button class="category-item" data-category="ponchos">Ponchos <span class="category-count"></span></button>
+      <button class="category-item" data-category="vests">Vests <span class="category-count"></span></button>
+      <button class="category-item" data-category="wip">WIP <span class="category-count"></span></button>
+      <button class="category-item" data-category="toys">Toys <span class="category-count"></span></button>
+      <button class="category-item" data-category="decor">Decor <span class="category-count"></span></button>
+      <button class="category-item" data-category="wraps">Wraps <span class="category-count"></span></button>
     </div>
   </div>
   
@@ -575,7 +1348,7 @@
   </div>
   
   {% if block.settings.enable_load_more %}
-  <div class="load-more-container">
+  <div class="load-more-container" id="load-more-container">
     <button id="load-more-btn" class="load-more-btn">{{ block.settings.load_more_text | default: 'Load More Projects' }}</button>
     <button id="load-less-btn" class="load-less-btn hidden">{{ block.settings.load_less_text | default: 'Show Less' }}</button>
   </div>
@@ -586,530 +1359,491 @@
   </div>
 </div>
 
-<script>
-const projectData = {
-  projects: [
-    {
-      projectName: "Purple Cable Socks",
-      firstName: "Sarah",
-      lastName: "Johnson",
-      nameDisplay: "first",
-      socialMedia: "@knittingadventures",
-      patternName: "Classic Cable Socks",
-      designerName: "Emma Wilson",
-      tags: ["Socks", "Cables"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/ccb3b135-09f6-4d41-afb5-ad3298ca6cbc/20240524_221120.jpg"],
-      product: {
-        title: "Bad Sheep Sock Yarn",
-        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/ccb3b135-09f6-4d41-afb5-ad3298ca6cbc/20240524_221120.jpg",
-        options: [["Color", "Purple Passion"], ["Weight", "Fingering"]]
-      },
-      dateAdded: "2023-11-15",
-      likes: 42
-    },
-    {
-      projectName: "Woodland Path Shawl",
-      firstName: "Emily",
-      lastName: "Davis",
-      nameDisplay: "first",
-      socialMedia: "@stitchcraft",
-      patternName: "Woodland Path Shawl",
-      designerName: "Maria Garcia",
-      tags: ["Shawls", "Texture"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/6f46c968-e1f1-4744-9b1c-4e5903f62231/Gail-P-2.jpg"],
-      product: {
-        title: "Bad Sheep Merino Sock",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Forest Green"], ["Weight", "Fingering"]]
-      },
-      dateAdded: "2023-10-22",
-      likes: 37
-    },
-    {
-      projectName: "Watermelon Cardigan",
-      firstName: "Jessica",
-      lastName: "Smith",
-      nameDisplay: "first",
-      socialMedia: "@yarnlover",
-      patternName: "Summer Fruit Cardigan",
-      designerName: "Lila Wong",
-      tags: ["Sweaters", "Colorwork"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/b758e650-bbfb-48ca-a1c1-ddae8527f74d/Watermelon-Cardi-finished.jpg"],
-      product: {
-        title: "Bad Sheep Worsted",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Watermelon & Lime"], ["Weight", "Worsted"]]
-      },
-      dateAdded: "2024-01-18",
-      likes: 85
-    },
-    {
-      projectName: "Cozy Cable Beanie",
-      firstName: "Michael",
-      lastName: "Brown",
-      nameDisplay: "first",
-      socialMedia: "@knitwithme",
-      patternName: "Alpine Twist Hat",
-      designerName: "Samantha Chen",
-      tags: ["Headware", "Cables"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg"],
-      product: {
-        title: "Bad Sheep DK",
-        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg",
-        options: [["Color", "Misty Morning"], ["Weight", "DK"]]
-      },
-      dateAdded: "2023-12-05",
-      likes: 29
-    },
-    {
-      projectName: "Rainbow Granny Blanket",
-      firstName: "Alex",
-      lastName: "Taylor",
-      nameDisplay: "first",
-      socialMedia: "@hookedoncrochet",
-      patternName: "Classic Granny Square Blanket",
-      designerName: "Elizabeth Cooper",
-      tags: ["Blankets", "Crochet"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/6f46c968-e1f1-4744-9b1c-4e5903f62231/Gail-P-2.jpg"],
-      product: {
-        title: "Bad Sheep Worsted Mini Set",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Rainbow Mix"], ["Weight", "Worsted"]]
-      },
-      dateAdded: "2024-02-10",
-      likes: 113
-    },
-    {
-      projectName: "Autumn Leaves Wrap",
-      firstName: "Olivia",
-      lastName: "Clark",
-      nameDisplay: "first",
-      socialMedia: "@craftystitcher",
-      patternName: "Fall Foliage Wrap",
-      designerName: "David Wilson",
-      tags: ["Wraps", "Lace"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/b758e650-bbfb-48ca-a1c1-ddae8527f74d/Watermelon-Cardi-finished.jpg"],
-      product: {
-        title: "Bad Sheep Fingering",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Autumn Blend"], ["Weight", "Fingering"]]
-      },
-      dateAdded: "2023-09-17",
-      likes: 67
-    },
-    {
-      projectName: "Fisherman's Rib Cowl",
-      firstName: "Daniel",
-      lastName: "Miller",
-      nameDisplay: "first",
-      socialMedia: "@knittingdad",
-      patternName: "Seaside Cowl",
-      designerName: "Rachel Kim",
-      tags: ["Cowls", "Texture"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg"],
-      product: {
-        title: "Bad Sheep Bulky",
-        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/e5f208fb-c22c-4348-a60e-cb9bd29c9568/Eileen-H.jpg",
-        options: [["Color", "Sea Foam"], ["Weight", "Bulky"]]
-      },
-      dateAdded: "2023-08-30",
-      likes: 51
-    },
-    {
-      projectName: "Colorblock Baby Blanket",
-      firstName: "Sophie",
-      lastName: "Wilson",
-      nameDisplay: "first",
-      socialMedia: "@yarncrafts",
-      patternName: "Modern Baby Blanket",
-      designerName: "James Garcia",
-      tags: ["Blankets", "Babies"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/6f46c968-e1f1-4744-9b1c-4e5903f62231/Gail-P-2.jpg"],
-      product: {
-        title: "Bad Sheep DK",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Pastel Collection"], ["Weight", "DK"]]
-      },
-      dateAdded: "2024-01-05",
-      likes: 73
-    },
-    {
-      projectName: "Lace Summer Top",
-      firstName: "Hannah",
-      lastName: "Lee",
-      nameDisplay: "first",
-      socialMedia: "@hannahknits",
-      patternName: "Breeze Top",
-      designerName: "Nicole Chen",
-      tags: ["Tops", "Lace"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/b758e650-bbfb-48ca-a1c1-ddae8527f74d/Watermelon-Cardi-finished.jpg"],
-      product: {
-        title: "Bad Sheep Sport",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Sage"], ["Weight", "Sport"]]
-      },
-      dateAdded: "2023-07-22",
-      likes: 94
-    },
-    {
-      projectName: "Knit Watermelon Dress",
-      firstName: "Lily",
-      lastName: "Roberts",
-      nameDisplay: "first",
-      socialMedia: "@lilystitch",
-      patternName: "Summer Fruit Dress",
-      designerName: "Emma Parker",
-      tags: ["Babies", "Colorwork"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/c0cb9829-a866-44e8-99de-16165c0afb6c/Dora-O-3.jpg"],
-      product: {
-        title: "Bad Sheep Worsted",
-        imageUrl: "https://images4-f.ravelrycache.com/uploads/BadSheepYarn/891751458/20230208_163830_small_best_fit.jpg",
-        options: [["Color", "Watermelon & Lime"], ["Weight", "Worsted"]]
-      },
-      dateAdded: "2023-03-15",
-      likes: 128
-    },
-    {
-      projectName: "Colorful Scarf",
-      firstName: "Tina",
-      lastName: "Wong",
-      nameDisplay: "first",
-      socialMedia: "@tinaknits",
-      patternName: "Rainbow Path Scarf",
-      designerName: "David Turner",
-      tags: ["Scarves", "Colorwork"],
-      images: ["https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/2e597306-83f0-4b2e-b091-082e6d67785c/Gloria-M.jpg"],
-      product: {
-        title: "Bad Sheep Minis Set",
-        imageUrl: "https://files.elfsightcdn.com/eafe4a4d-3436-495d-b748-5bdce62d911d/2e597306-83f0-4b2e-b091-082e6d67785c/Gloria-M.jpg", 
-        options: [["Color", "Rainbow Collection"], ["Weight", "Fingering"]]
-      },
-      dateAdded: "2024-02-28",
-      likes: 45
-    }
-  ],
-  currentCategory: 'all',
-  currentSortOption: 'newest',
-  searchTerm: '',
-  batchSize: {{ block.settings.batch_size | default: 3 }},
-  currentIndex: 0
-};
-
-// Template for project card
-function createProjectCard(project, index) {
-  // Show permanent info overlay on some cards (like in screenshot)
-  const showInfoOverlay = [2, 5, 7, 10].includes(index);
-  
-  return `
-    <div class="masonry-grid-item" data-category="${project.tags.map(tag => tag.toLowerCase().replace(' ', '-')).join(' ')}">
-      <div class="project-card">
-        <div class="project-image">
-          <img 
-            src="${project.images[0]}" 
-            alt="${project.projectName}"
-            loading="lazy"
-          >
-          ${showInfoOverlay ? `
-          <div class="project-info-overlay">
-            <div class="project-info-title">${project.projectName}</div>
-            <div class="project-info-creator">by ${project.firstName} ${project.socialMedia ? `• ${project.socialMedia}` : ''}</div>
-            ${project.tags ? `
-            <div class="project-info-tags">
-              ${project.tags.slice(0, 2).map(tag => `<span class="project-info-tag">${tag}</span>`).join('')}
-            </div>
-            ` : ''}
-          </div>
-          ` : ''}
-        </div>
-        ${!showInfoOverlay ? `
-        <div class="project-content">
-          <div class="project-title">${project.projectName}</div>
-          <div class="project-meta">
-            ${getDisplayName(project)}
-            ${project.socialMedia ? `• ${project.socialMedia}` : ''}
-          </div>
-          ${project.tags ? `
-            <div class="project-tags">
-              ${project.tags.map(tag => `<span class="project-tag">${tag}</span>`).join('')}
-            </div>
-          ` : ''}
-          ${project.patternName ? `
-            <div class="project-meta">Pattern: ${project.patternName}${project.designerName ? ` by ${project.designerName}` : ''}</div>
-          ` : ''}
-          <div class="project-product">
-            <div class="product-image">
-              <img 
-                src="${project.product.imageUrl}" 
-                alt="${project.product.title}"
-                loading="lazy"
-              >
-            </div>
-            <div class="product-details">
-              <div class="product-title">${project.product.title}</div>
-              ${project.product.options ? `
-                <div class="product-variant">
-                  ${project.product.options.map(option => `${option[0]}: ${option[1]}`).join(', ')}
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-        ` : ''}
+<!-- Lightbox Gallery - Updated for fullscreen without thumbnails -->
+<div class="gallery-lightbox" id="gallery-lightbox">
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close gallery">&times;</button>
+    <div class="image-counter" id="image-counter">6 / 23</div>
+    
+    <div class="lightbox-main">
+      <div class="lightbox-image-container">
+        <div class="loading-spinner" id="lightbox-spinner"></div>
+        <img src="" alt="" class="lightbox-image" id="lightbox-image" width="800" height="600">
+        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous image">&lt;</button>
+        <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next image">&gt;</button>
+        <button class="expand-image-btn" id="expand-image-btn" aria-label="View full size image">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="lightbox-details" id="lightbox-details">
+        <!-- Project details will be filled dynamically -->
       </div>
     </div>
-  `;
-}
+    
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+    <div class="lightbox-nav-controls">
+      <button class="project-nav-btn" id="prev-project-btn">Previous Project</button>
+      <button class="project-nav-btn" id="next-project-btn">Next Project</button>
+    </div>
+  </div>
+</div>
 
-// Helper function to get display name based on nameDisplay setting
-function getDisplayName(project) {
-  switch(project.nameDisplay) {
-    case 'full':
-      return `by ${project.firstName} ${project.lastName}`;
-    case 'first':
-      return `by ${project.firstName}`;
-    case 'initials':
-      return `by ${project.firstName[0]}${project.lastName[0]}`;
-    default:
-      return 'by Anonymous';
-  }
-}
+<!-- Add expanded view container -->
+<div class="expanded-view" id="expanded-view">
+  <div class="expanded-image-container">
+    <button class="expanded-close" id="expanded-close" aria-label="Close expanded view">&times;</button>
+    <img src="" alt="" class="expanded-image" id="expanded-image" width="1200" height="900">
+  </div>
+</div>
 
-// Sort projects based on the selected option
-function sortProjects(projects, sortOption) {
-  const sortedProjects = [...projects]; // Create a copy to avoid modifying the original
-  
-  switch(sortOption) {
-    case 'newest':
-      return sortedProjects.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
-    case 'oldest':
-      return sortedProjects.sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
-    case 'popular':
-      return sortedProjects.sort((a, b) => b.likes - a.likes);
-    case 'az':
-      return sortedProjects.sort((a, b) => a.projectName.localeCompare(b.projectName));
-    case 'za':
-      return sortedProjects.sort((a, b) => b.projectName.localeCompare(a.projectName));
-    default:
-      return sortedProjects;
-  }
-}
+<!-- Add hidden input for batch size to be accessed by JavaScript -->
+<input type="hidden" id="gallery-batch-size" value="{{ block.settings.batch_size | default: 3 }}">
 
-// Render projects based on current category and sorting option
-function renderProjects(loadMore = false, loadLess = false) {
-  const galleryGrid = document.getElementById('gallery-grid');
-  const loadMoreBtn = document.getElementById('load-more-btn');
-  const loadLessBtn = document.getElementById('load-less-btn');
-  
-  if (!galleryGrid) return;
+<!-- Load external JavaScript file -->
+<script type="text/javascript" src="{{ 'project-gallery.js' | asset_url }}" defer></script>
 
-  // Store the original/previous index before any resets (for load less functionality)
-  const previousIndex = projectData.currentIndex;
-
-  // If loading less, set current index back to initial batch
-  if (loadLess) {
-    projectData.currentIndex = 0;
-    galleryGrid.innerHTML = '';
-  }
-  // If not loading more, reset the current index and clear the grid 
-  else if (!loadMore) {
-    projectData.currentIndex = 0;
-    galleryGrid.innerHTML = '';
-  }
-
-  // Filter by category
-  let filteredProjects = projectData.currentCategory === 'all' 
-    ? projectData.projects 
-    : projectData.projects.filter(project => 
-        project.tags.some(tag => 
-          tag.toLowerCase().replace(' ', '-') === projectData.currentCategory
-        )
-      );
-  
-  // Filter by search term if it exists
-  const searchTerm = projectData.searchTerm || '';
-  if (searchTerm) {
-    filteredProjects = filteredProjects.filter(project => {
-      const projectNameMatch = project.projectName && 
-        project.projectName.toLowerCase().includes(searchTerm);
-      const productMatch = project.product && 
-        project.product.title.toLowerCase().includes(searchTerm);
-      const patternMatch = project.patternName && 
-        project.patternName.toLowerCase().includes(searchTerm);
-      const designerMatch = project.designerName && 
-        project.designerName.toLowerCase().includes(searchTerm);
-        
-      // Check tags
-      let tagMatch = false;
-      if (project.tags && Array.isArray(project.tags)) {
-        tagMatch = project.tags.some(tag => 
-          tag.toLowerCase().includes(searchTerm)
-        );
-      }
-      
-      return projectNameMatch || productMatch || tagMatch || designerMatch || patternMatch;
-    });
-  }
-  
-  // Sort the filtered projects
-  filteredProjects = sortProjects(filteredProjects, projectData.currentSortOption);
-
-  // Handle no results
-  if (filteredProjects.length === 0) {
-    galleryGrid.innerHTML = '<div class="no-results">No projects found matching your search</div>';
-    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
-    if (loadLessBtn) loadLessBtn.classList.add('hidden');
-    return;
-  }
-  
-  // If load more/less is disabled, show all projects at once
-  if (!loadMoreBtn) {
-    galleryGrid.innerHTML = filteredProjects.map((project, index) => 
-      createProjectCard(project, index)
-    ).join('');
-    return;
-  }
-  
-  // Get current batch of projects
-  const startIndex = projectData.currentIndex;
-  const endIndex = Math.min(startIndex + projectData.batchSize, filteredProjects.length);
-  const currentBatch = filteredProjects.slice(startIndex, endIndex);
-  
-  // Create and append project cards
-  const projectsHTML = currentBatch.map((project, index) => 
-    createProjectCard(project, startIndex + index)
-  ).join('');
-  
-  // Append new projects to existing ones if loading more
-  galleryGrid.innerHTML += projectsHTML;
-  
-  // Update current index
-  projectData.currentIndex = endIndex;
-  
-  // Show or hide load more button
-  if (projectData.currentIndex >= filteredProjects.length) {
-    loadMoreBtn.classList.add('hidden');
-  } else {
-    loadMoreBtn.classList.remove('hidden');
-  }
-  
-  // Show load less button if we've loaded more than the initial batch
-  if (projectData.currentIndex > projectData.batchSize) {
-    loadLessBtn.classList.remove('hidden');
-  } else {
-    loadLessBtn.classList.add('hidden');
-  }
-}
-
-// Handle category filter clicks
-function setupCategoryFilters() {
-  document.querySelectorAll('.category-item').forEach(button => {
-    button.addEventListener('click', () => {
-      // Update active state
-      document.querySelector('.category-item.active').classList.remove('active');
-      button.classList.add('active');
-      
-      // Update current category and re-render
-      projectData.currentCategory = button.dataset.category;
-      renderProjects();
-    });
-  });
-}
-
-// Setup sorting dropdown
-function setupSorting() {
-  const sortSelect = document.getElementById('sort-select');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', () => {
-      projectData.currentSortOption = sortSelect.value;
-      renderProjects();
-    });
-  }
-}
-
-// Initialize gallery
+<!-- Add script to fetch data from API and initialize the gallery -->
+<script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Get the sort select element if it exists
-  const sortSelect = document.getElementById('sort-select');
-  if (sortSelect) {
-    projectData.currentSortOption = sortSelect.value;
+  // Initialize empty project data to prevent errors
+  window.projectData = {
+    projects: [],
+    currentCategory: 'all',
+    currentSortOption: '{{ block.settings.default_sort | default: "newest" }}',
+    searchTerm: '',
+    batchSize: parseInt(document.getElementById('gallery-batch-size')?.value || '9'),
+    currentIndex: 0,
+    apiFiltering: true // Flag to indicate we're using API-based filtering
+  };
+
+  // API URL for public submissions
+  const API_URL = 'https://badsheepyarn-gallery-app.vercel.app/api/public/submissions';
+  
+  // Show loading state
+  const galleryGrid = document.getElementById('gallery-grid');
+  if (galleryGrid) {
+    galleryGrid.innerHTML = `
+      <div class="loading-indicator" style="text-align: center; padding: 3rem;">
+        <div class="loading-spinner active" style="display: inline-block;"></div>
+        <p>Loading projects...</p>
+      </div>
+    `;
   }
   
-  // Get search elements if search is enabled
-  const searchInput = document.getElementById('gallery-search');
-  const clearButton = document.getElementById('search-clear');
+  // Fetch the projects from the API with filtering parameters
+  async function fetchProjects(appendResults = false) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const shopDomain = '{{ shop.permanent_domain }}';
+        let url = `${API_URL}?shop=${shopDomain}&perPage=100`;
+        
+        // Add search term if exists
+        if (window.projectData.searchTerm) {
+          url += `&search=${encodeURIComponent(window.projectData.searchTerm)}`;
+        }
+        
+        // Add category filter if not 'all'
+        if (window.projectData.currentCategory && window.projectData.currentCategory !== 'all') {
+          // Convert to uppercase for the API query
+          const categoryParam = window.projectData.currentCategory.toUpperCase();
+          url += `&category=${encodeURIComponent(categoryParam)}`;
+          console.log('Filtering by category:', categoryParam);
+        }
+        
+        // Add sorting parameter
+        if (window.projectData.currentSortOption) {
+          url += `&sort=${encodeURIComponent(window.projectData.currentSortOption)}`;
+        }
+        
+        // Add pagination if we're loading more
+        if (appendResults && window.projectData.currentIndex > 0) {
+          url += `&page=${Math.floor(window.projectData.currentIndex / window.projectData.batchSize) + 1}`;
+        }
+        
+        console.log('Fetching projects with URL:', url);
+        
+        // Show loading indicator if not appending
+        if (!appendResults && galleryGrid) {
+          galleryGrid.innerHTML = `
+            <div class="loading-indicator">
+              <div class="loading-spinner active"></div>
+              <p>Loading projects...</p>
+            </div>
+          `;
+        }
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        
+        const data = await response.json();
+        
+        if (!data.submissions || data.submissions.length === 0) {
+          // Show no projects message if empty
+          if (galleryGrid) {
+            // Add empty class to grid for styling
+            galleryGrid.classList.add('empty');
+            
+            galleryGrid.innerHTML = `
+              <div class="no-results">
+                <div class="no-results-icon">🧶</div>
+                <p>No projects found matching your criteria</p>
+                <p>Try adjusting your search terms or selecting a different category</p>
+                <button class="view-project-btn" onclick="window.location.href='${window.location.pathname}'">View All Projects</button>
+              </div>
+            `;
+          }
+          resolve(); // Resolve the promise even when no data
+          return;
+        }
+        
+        // We have data, remove empty class if it exists
+        if (galleryGrid) {
+          galleryGrid.classList.remove('empty');
+        }
+        
+        // Format the API data to match the expected format in project-gallery.js
+        const projects = (data.submissions || []).map(submission => {
+          // Process categories - either use the array or create from the string
+          let categories = [];
+          if (submission.categories && Array.isArray(submission.categories)) {
+            // Process categories - normalize case for display 
+            categories = submission.categories.map(cat => {
+              // For all uppercase categories (like "SOCKS"), convert to title case ("Socks")
+              if (cat === cat.toUpperCase()) {
+                return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+              }
+              return cat;
+            });
+          } else if (submission.category) {
+            // Split the category string by commas if it's a comma-separated list
+            categories = submission.category.split(',').map(cat => {
+              const trimmed = cat.trim();
+              // For all uppercase categories, convert to title case
+              if (trimmed === trimmed.toUpperCase()) {
+                return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+              }
+              return trimmed;
+            });
+          }
+          
+          return {
+            projectName: submission.projectName || 'Untitled Project',
+            firstName: submission.firstName || '',
+            lastName: submission.lastName || '',
+            nameDisplay: submission.nameDisplayPreference || 'anonymous',
+            socialMedia: submission.socialMediaHandle || '',
+            patternName: submission.patternName || '',
+            designerName: submission.designerName || '',
+            patternLink: submission.patternLink || '',
+            displayName: submission.displayName || '',
+            // Use the processed categories array
+            tags: categories.length > 0 ? categories : ['Other'],
+            images: submission.images.map(img => img.url) || [],
+            product: {
+              title: submission.product?.title || 'Product',
+              imageUrl: submission.product?.imageUrl || '',
+              options: submission.product?.selectedOption ? 
+                Object.entries(JSON.parse(submission.product.selectedOption)) : [],
+              url: `${window.location.origin}/products/${submission.product?.handle}`
+            },
+            dateAdded: submission.approvedAt || submission.createdAt,
+            likes: 0 // We don't have likes yet in the API
+          };
+        });
+        
+        // Update project data - append or replace
+        if (appendResults) {
+          window.projectData.projects = [...window.projectData.projects, ...projects];
+        } else {
+          window.projectData.projects = projects;
+          window.projectData.currentIndex = 0; // Reset pagination when filters change
+        }
+        
+        console.log('Projects loaded:', projects.length, 'Total:', window.projectData.projects.length);
+        
+        // Initialize the gallery
+        if (typeof renderProjects === 'function') {
+          // Small timeout to ensure DOM is ready
+          setTimeout(() => {
+            renderProjects();
+          }, 100);
+        }
+        
+        // Update load more button visibility
+        updateLoadMoreButton(data.total, window.projectData.projects.length);
+        
+        // Resolve the promise when done
+        resolve();
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        // Show error message in gallery
+        if (galleryGrid) {
+          galleryGrid.classList.add('empty');
+          
+          galleryGrid.innerHTML = `
+            <div class="no-results">
+              <div class="no-results-icon">⚠️</div>
+              <p>Failed to load projects</p>
+              <p>Please try again later or contact support if the problem persists</p>
+              <button class="view-project-btn" onclick="window.location.reload()">Try Again</button>
+            </div>
+          `;
+        }
+        // Reject the promise on error
+        reject(error);
+      }
+    });
+  }
   
-  if (searchInput && clearButton) {
-    // Set up search functionality
-    searchInput.addEventListener('input', function() {
-      const searchTerm = this.value.toLowerCase().trim();
-      handleSearch(searchTerm);
+  // Helper function to update load more button visibility
+  function updateLoadMoreButton(totalCount, loadedCount) {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const loadLessBtn = document.getElementById('load-less-btn');
+    
+    if (!loadMoreBtn || !loadLessBtn) return;
+    
+    if (loadedCount >= totalCount) {
+      loadMoreBtn.classList.add('hidden');
+    } else {
+      loadMoreBtn.classList.remove('hidden');
+    }
+    
+    if (window.projectData.currentIndex > 0) {
+      loadLessBtn.classList.remove('hidden');
+    } else {
+      loadLessBtn.classList.add('hidden');
+    }
+  }
+  
+  // Initial fetch
+  fetchProjects();
+  
+  // Remove any existing event listeners (to avoid duplication)
+  function clearEventListeners(element, event) {
+    if (!element) return;
+    
+    // Create a clone of the element
+    const clone = element.cloneNode(true);
+    
+    // Replace the original element with the clone
+    element.parentNode.replaceChild(clone, element);
+    
+    // Return the clone so we can add new event listeners
+    return clone;
+  }
+  
+  // Reset event listeners for search
+  const searchInput = document.getElementById('gallery-search');
+  const searchClear = document.getElementById('search-clear');
+  
+  if (searchInput) {
+    // Clear existing listeners and get a fresh element
+    const newSearchInput = clearEventListeners(searchInput, 'input');
+    
+    // Add new event listener
+    let searchTimeout;
+    newSearchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      
+      searchTimeout = setTimeout(() => {
+        window.projectData.searchTerm = this.value.toLowerCase().trim();
+        window.projectData.currentIndex = 0; // Reset pagination
+        fetchProjects(); // Re-fetch with the new search term
+      }, 300);
     });
     
     // Clear search button
-    clearButton.addEventListener('click', function() {
-      searchInput.value = '';
-      handleSearch('');
-      this.style.display = 'none';
-    });
-    
-    // Show/hide clear button based on input
-    searchInput.addEventListener('input', function() {
-      clearButton.style.display = this.value ? 'block' : 'none';
-    });
+    if (searchClear) {
+      const newSearchClear = clearEventListeners(searchClear, 'click');
+      newSearchClear.addEventListener('click', function() {
+        newSearchInput.value = '';
+        window.projectData.searchTerm = '';
+        window.projectData.currentIndex = 0; // Reset pagination
+        fetchProjects(); // Re-fetch with no search term
+      });
+    }
   }
   
-  // Set up category filter
-  setupCategoryFilters();
+  // Override category click handler to use API filtering
+  const categoryButtons = document.querySelectorAll('.category-item');
+  categoryButtons.forEach(button => {
+    // Clear existing listeners and get a fresh element
+    const newButton = clearEventListeners(button, 'click');
+    
+    newButton.addEventListener('click', function(e) {
+      e.preventDefault(); // Prevent default behavior
+      
+      // Remove active class from all buttons
+      document.querySelectorAll('.category-item').forEach(btn => btn.classList.remove('active'));
+      
+      // Add active class to clicked button
+      this.classList.add('active');
+      
+      // Add loading state to active button
+      this.classList.add('loading');
+      
+      // Update current category
+      window.projectData.currentCategory = this.dataset.category;
+      
+      // Refetch with the new category
+      fetchProjects().then(() => {
+        // Remove loading state when done
+        this.classList.remove('loading');
+      }).catch(() => {
+        // Remove loading state even if there's an error
+        this.classList.remove('loading');
+      });
+    });
+  });
   
-  // Set up sorting
-  setupSorting();
-  
-  // Set up load more button
+  // Override sort handler to use API filtering
+  const sortSelect = document.getElementById('sort-select');
+  if (sortSelect) {
+    // Clear existing listeners and get a fresh element
+    const newSortSelect = clearEventListeners(sortSelect, 'change');
+    
+    newSortSelect.addEventListener('change', function(e) {
+      window.projectData.currentSortOption = this.value;
+      fetchProjects(); // Re-fetch with the new sort option
+    });
+  }
+
+  // Setup load more/less functionality
   const loadMoreBtn = document.getElementById('load-more-btn');
   const loadLessBtn = document.getElementById('load-less-btn');
   
   if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', function() {
-      renderProjects(true); // true indicates we're loading more
+    // Clear existing listeners and get a fresh element
+    const newLoadMoreBtn = clearEventListeners(loadMoreBtn, 'click');
+    
+    newLoadMoreBtn.addEventListener('click', function() {
+      window.projectData.currentIndex += window.projectData.batchSize;
+      
+      if (window.projectData.apiFiltering) {
+        // Using API-based pagination
+        fetchProjects(true); // true = append results
+      } else {
+        // Using client-side pagination
+        renderProjects();
+      }
+      
+      // Scroll to newly loaded projects
+      window.scrollBy({
+        top: 300,
+        behavior: 'smooth'
+      });
     });
   }
   
   if (loadLessBtn) {
-    loadLessBtn.addEventListener('click', function() {
-      renderProjects(false, true); // second param true indicates we're loading less
+    // Clear existing listeners and get a fresh element
+    const newLoadLessBtn = clearEventListeners(loadLessBtn, 'click');
+    
+    newLoadLessBtn.addEventListener('click', function() {
+      window.projectData.currentIndex = 0;
       
-      // Smooth scroll to the top of the gallery
-      document.querySelector('.project-gallery').scrollIntoView({ 
+      if (window.projectData.apiFiltering) {
+        // Using API-based pagination
+        fetchProjects(false); // false = start fresh
+      } else {
+        // Using client-side pagination
+        renderProjects();
+      }
+      
+      // Scroll to top of gallery
+      document.querySelector('.project-gallery').scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
     });
   }
-  
-  // Load initial project data
-  renderProjects();
 });
-
-// Handle search functionality
-function handleSearch(searchTerm) {
-  projectData.searchTerm = searchTerm;
-  renderProjects();
-  
-  // Show or hide no results message
-  const noResultsElement = document.querySelector('.no-results');
-  if (noResultsElement) {
-    if (document.querySelectorAll('.masonry-item:not(.hidden)').length === 0) {
-      noResultsElement.style.display = 'block';
-    } else {
-      noResultsElement.style.display = 'none';
-    }
-  }
-}
 </script>
 
-<!-- No need for masonry.js or imagesloaded since we're using CSS columns -->
-<!-- <script type="text/javascript" src="{{ 'masonry.pkgd.min.js' | asset_url }}" defer></script> -->
-<!-- <script type="text/javascript" src="{{ 'imagesloaded.pkgd.min.js' | asset_url }}" defer></script> -->
+<!-- Load script to fix lightbox scrolling issues -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Fix scrolling in lightbox
+  function fixLightboxScrolling() {
+    const lightbox = document.getElementById('gallery-lightbox');
+    const lightboxContent = document.querySelector('.lightbox-content');
+    const lightboxMain = document.querySelector('.lightbox-main');
+    const detailsContainer = document.querySelector('.lightbox-details');
+    
+    if (!lightbox || !lightboxContent || !lightboxMain || !detailsContainer) return;
+    
+    // Fix scrolling on mobile
+    function adjustScrolling() {
+      // Check if mobile
+      const isMobile = window.innerWidth <= 768;
+      
+      if (isMobile) {
+        // On mobile, main content area should scroll
+        lightboxMain.style.overflowY = 'auto';
+        // Adjust position to center of screen
+        lightboxContent.style.top = '50%';
+        lightboxContent.style.transform = 'translateY(-50%)';
+      } else {
+        // On desktop, details should scroll but main doesn't need to
+        lightboxMain.style.overflowY = 'hidden';
+        detailsContainer.style.overflowY = 'auto';
+      }
+    }
+    
+    // Fix iOS scrolling issues
+    function preventBodyScroll(event) {
+      if (lightbox.classList.contains('active')) {
+        event.preventDefault();
+      }
+    }
+    
+    // Run on lightbox open
+    function onLightboxOpen() {
+      if (lightbox.classList.contains('active')) {
+        adjustScrolling();
+        
+        // Set focus to ensure scrollable
+        setTimeout(() => {
+          detailsContainer.focus();
+        }, 100);
+      }
+    }
+    
+    // Watch for lightbox opening
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.attributeName === 'class') {
+          onLightboxOpen();
+        }
+      });
+    });
+    
+    observer.observe(lightbox, { attributes: true });
+    
+    // Also handle resize events
+    window.addEventListener('resize', adjustScrolling);
+    
+    // Fix iOS scrolling
+    document.addEventListener('touchmove', preventBodyScroll, { passive: false });
+    
+    // Run once on init
+    adjustScrolling();
+  }
+  
+  // Initialize when DOM is ready
+  if (document.getElementById('gallery-lightbox')) {
+    fixLightboxScrolling();
+  }
+});
+</script>
 
 {% schema %}
 {

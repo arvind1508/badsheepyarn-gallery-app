@@ -3,7 +3,7 @@
 client_id = "4694b10e7c877193823487855d19e601"
 name = "bad-ship-gallery"
 handle = "bad-ship-gallery"
-application_url = "https://please-cards-hepatitis-hk.trycloudflare.com"
+application_url = "https://diving-civil-lid-offset.trycloudflare.com"
 embedded = true
 
 [build]
@@ -28,9 +28,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://please-cards-hepatitis-hk.trycloudflare.com/auth/callback",
-  "https://please-cards-hepatitis-hk.trycloudflare.com/auth/shopify/callback",
-  "https://please-cards-hepatitis-hk.trycloudflare.com/api/auth/callback"
+  "https://badsheepyarn-gallery-app.vercel.app/auth/callback",
+  "https://badsheepyarn-gallery-app.vercel.app/auth/shopify/callback",
+  "https://badsheepyarn-gallery-app.vercel.app/api/auth/callback"
 ]
 
 [pos]

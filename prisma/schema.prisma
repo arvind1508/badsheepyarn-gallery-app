@@ -88,6 +88,8 @@ model ProjectSubmission {
   images                ProjectImage[]
   product               Product        @relation(fields: [productId], references: [id])
   shop                  String?
+  projectDetails        String?
+  categories            String[]       @default([])
   @@index([email])
   @@index([status])
   @@index([productId])
@@ -96,6 +98,7 @@ model ProjectSubmission {
 
 model Product {
   id          String              @id @default(cuid())
+  shopifyId   String
   title       String
   handle      String
   description String?

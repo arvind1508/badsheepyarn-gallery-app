@@ -1,5 +1,10 @@
 {% assign avg_rating = block.settings.product.metafields.demo.avg_rating.value | round %}
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Quill.js CSS and JS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js" defer></script>
+
 <style>
 .form-container {
   min-height: 100vh;
@@ -112,7 +117,7 @@
 
 .button-primary {
   background-color: var(--primary-color, #4f46e5);
-  color: white;
+  color: var(--primary-text-color, white);
   padding: 1.25rem 2.5rem;
   font-size: 1.75rem;
   font-weight: 600;
@@ -665,6 +670,7 @@ select.form-input {
   font-size: 1.75rem;
   color: #4b5563;
 }
+
 .tags-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -700,6 +706,277 @@ select.form-input {
 
 .tag-item:hover label {
   color: var(--primary-color, #4f46e5);
+}
+
+/* Quill Editor */
+.quill-editor {
+  border-radius: 0.75rem;
+  font-size: 1.75rem;
+  line-height: 1.6;
+  background: white;
+}
+
+.ql-toolbar.ql-snow {
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  border-color: #d1d5db;
+  background: #f9fafb;
+  padding: 0.75rem;
+}
+
+.ql-container.ql-snow {
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  border-color: #d1d5db;
+  min-height: 12rem;
+  font-family: inherit;
+  font-size: 1.75rem;
+}
+
+.ql-editor {
+  min-height: 12rem;
+}
+
+.ql-editor.ql-blank::before {
+  font-style: normal;
+  color: #9ca3af;
+  font-size: 1.75rem;
+}
+
+.ql-editor p, .ql-editor ol, .ql-editor ul, .ql-editor pre, .ql-editor blockquote {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+.ql-toolbar.ql-snow .ql-formats {
+  margin-right: 12px;
+}
+
+.ql-snow .ql-tooltip {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 3rem 1.5rem;
+  }
+  
+  .form-card {
+    padding: 2rem;
+  }
+  
+  .step-title {
+    font-size: 2rem;
+  }
+  
+  .step-description {
+    font-size: 1.5rem;
+  }
+  
+  .form-label {
+    font-size: 1.5rem;
+  }
+  
+  .form-input, 
+  .variant-option select,
+  #product-search {
+    font-size: 1.5rem;
+    padding: 1.25rem;
+  }
+  
+  .button-primary,
+  .button-secondary {
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+  }
+  
+  .form-group.grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .tags-container {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  
+  .tag-item label {
+    font-size: 1.4rem;
+  }
+  
+  .file-upload {
+    padding: 2rem;
+  }
+  
+  .file-upload-text {
+    font-size: 1.5rem;
+  }
+  
+  .file-upload-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+  
+  .selected-product {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .selected-product-image {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .button-group button {
+    width: 100%;
+  }
+  
+  .product-item {
+    padding: 1rem;
+  }
+  
+  .product-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .editor-btn {
+    font-size: 1.25rem;
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .editor-content {
+    min-height: 10rem;
+    font-size: 1.5rem;
+    padding: 1.25rem;
+  }
+  
+  /* Adjust Quill for tablets */
+  .ql-container.ql-snow {
+    font-size: 1.5rem;
+  }
+  
+  .ql-editor.ql-blank::before {
+    font-size: 1.5rem;
+  }
+  
+  .ql-editor p, .ql-editor ol, .ql-editor ul, .ql-editor pre, .ql-editor blockquote {
+    font-size: 1.5rem;
+  }
+  
+  .ql-editor {
+    min-height: 10rem;
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 2rem 1rem;
+  }
+  
+  .form-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  
+  .step-title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-description {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  
+  .form-label {
+    font-size: 1.25rem;
+  }
+  
+  .form-input, 
+  .variant-option select,
+  #product-search {
+    font-size: 1.25rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .button-primary,
+  .button-secondary {
+    font-size: 1.25rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.5rem;
+  }
+  
+  .file-upload-text {
+    font-size: 1.25rem;
+  }
+  
+  .file-upload-hint {
+    font-size: 1rem;
+  }
+  
+  .tag-item label {
+    font-size: 1.2rem;
+  }
+  
+  .tag-item input[type="checkbox"] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .tags-container {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    padding: 1rem;
+  }
+  
+  .product-title {
+    font-size: 1.25rem;
+  }
+  
+  .product-price {
+    font-size: 1.1rem;
+  }
+  
+  .editor-btn {
+    font-size: 1rem;
+    padding: 0.3rem 0.5rem;
+  }
+  
+  .editor-content {
+    min-height: 8rem;
+    font-size: 1.25rem;
+    padding: 1rem;
+  }
+  
+  /* Adjust Quill for mobile */
+  .ql-toolbar.ql-snow {
+    padding: 0.5rem;
+  }
+  
+  .ql-container.ql-snow {
+    font-size: 1.25rem;
+  }
+  
+  .ql-editor.ql-blank::before {
+    font-size: 1.25rem;
+  }
+  
+  .ql-editor p, .ql-editor ol, .ql-editor ul, .ql-editor pre, .ql-editor blockquote {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .ql-editor {
+    min-height: 8rem;
+    padding: 1rem;
+  }
 }
 </style>
 
@@ -773,7 +1050,12 @@ select.form-input {
           <label class="form-label">Designer Name</label>
           <input type="text" class="form-input">
         </div>
-           <div class="form-group">
+        <div class="form-group">
+          <label class="form-label">Any other project details?</label>
+          <div id="project-details-editor" class="quill-editor"></div>
+          <input type="hidden" id="project-details-input">
+        </div>
+        <div class="form-group">
           <label class="form-label">Select project categories that apply*</label>
           <div class="tags-container">
             <div class="tag-item">
@@ -846,7 +1128,6 @@ select.form-input {
           <button class="button button-secondary prev-step">Previous</button>
           <button class="button button-primary next-step">Next</button>
         </div>
-     
       </div>
 
       <!-- Step 5 -->
@@ -1184,6 +1465,79 @@ document.addEventListener('DOMContentLoaded', function() {
   const progressBar = document.querySelector('.progress-fill');
   let currentStep = 1;
 
+  // Initialize Quill editors
+  initQuillEditors();
+
+  function initQuillEditors() {
+    // Define options for all editors
+    const toolbarOptions = [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['link']
+    ];
+    
+    // Initialize each editor
+    const quillOptions = {
+      modules: {
+        toolbar: toolbarOptions
+      },
+      placeholder: 'Share your thoughts here...',
+      theme: 'snow'
+    };
+    
+    // Project details editor
+    const projectDetailsEditor = new Quill('#project-details-editor', {
+      ...quillOptions,
+      placeholder: 'Share any additional details about your project...'
+    });
+    
+    
+    
+    // Update hidden fields on text change
+    projectDetailsEditor.on('text-change', function() {
+      document.getElementById('project-details-input').value = projectDetailsEditor.root.innerHTML;
+    });
+   
+  }
+
+  // Validate categories selection in Step 4
+  const validateCategories = () => {
+    const categoryCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
+    if (categoryCheckboxes.length === 0) {
+      // Show error message if no categories are selected
+      const categoriesContainer = document.querySelector('.tags-container');
+      categoriesContainer.classList.add('error');
+      
+      // Add error message below categories
+      const errorMsg = document.createElement('p');
+      errorMsg.textContent = 'Please select at least one category';
+      errorMsg.style.color = '#ef4444';
+      errorMsg.style.marginTop = '0.5rem';
+      errorMsg.style.fontSize = '1.25rem';
+      
+      // Remove any existing error message first
+      const existingError = categoriesContainer.nextElementSibling;
+      if (existingError && existingError.style.color === '#ef4444') {
+        existingError.remove();
+      }
+      
+      categoriesContainer.parentNode.insertBefore(errorMsg, categoriesContainer.nextSibling);
+      return false;
+    }
+    
+    // If categories are selected, remove any error styling
+    const categoriesContainer = document.querySelector('.tags-container');
+    categoriesContainer.classList.remove('error');
+    
+    // Remove any existing error message
+    const existingError = categoriesContainer.nextElementSibling;
+    if (existingError && existingError.style.color === '#ef4444') {
+      existingError.remove();
+    }
+    
+    return true;
+  };
+
   function updateProgress() {
     const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
     progressBar.style.width = `${progress}%`;
@@ -1217,6 +1571,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // Special validation for categories in step 4
+    if (currentStep === 4) {
+      const categoryValid = validateCategories();
+      if (!categoryValid) {
+        isValid = false;
+        if (!firstInvalidField) {
+          // Scroll to categories section
+          const categoriesContainer = document.querySelector('.tags-container');
+          if (categoriesContainer) {
+            categoriesContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+    }
+
     // Special validation for product selection in step 6
     if (currentStep === 6 && !selectedProduct) {
       isValid = false;
@@ -1226,14 +1595,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Special validation for file upload in step 9
-    if (currentStep === 9) {
-      const fileInput = document.getElementById('file-upload');
-      if (fileInput && fileInput.files.length === 0) {
-        isValid = false;
-        const fileUpload = document.querySelector('.file-upload');
-        fileUpload.classList.add('error');
-        if (!firstInvalidField) firstInvalidField = fileInput;
-      }
+    if (currentStep === 9 && uploadedImages.length === 0) {
+      isValid = false;
+      const fileUpload = document.querySelector('.file-upload');
+      fileUpload.classList.add('error');
+      if (!firstInvalidField) firstInvalidField = document.getElementById('file-upload');
     }
 
     if (!isValid && firstInvalidField) {
@@ -1327,6 +1693,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate darker shade for hover
     const primaryDark = shadeColor(primaryColor, -20);
     document.documentElement.style.setProperty('--primary-color-dark', primaryDark);
+    
+    // Set primary text color based on background brightness
+    const textColor = getContrastColor(primaryColor);
+    document.documentElement.style.setProperty('--primary-text-color', textColor);
 
     // Set secondary color
     document.documentElement.style.setProperty('--secondary-color', secondaryColor);
@@ -1363,6 +1733,25 @@ document.addEventListener('DOMContentLoaded', function() {
   const primaryColor = '{{ block.settings.primary_color | default: "#4f46e5" }}';
   const secondaryColor = '{{ block.settings.secondary_color | default: "#e5e7eb" }}';
   setThemeColors(primaryColor, secondaryColor);
+
+  // Determine text color based on background brightness
+  function getContrastColor(hexColor) {
+    // Convert hex to RGB
+    const r = parseInt(hexColor.substr(1, 2), 16);
+    const g = parseInt(hexColor.substr(3, 2), 16);
+    const b = parseInt(hexColor.substr(5, 2), 16);
+    
+    // Calculate brightness using standard formula
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    // Return black for light backgrounds, white for dark
+    return brightness > 155 ? "#000000" : "#ffffff";
+  }
+  
+  
+  // Set text color
+  const textColor = getContrastColor(primaryColor);
+  document.documentElement.style.setProperty('--primary-text-color', textColor);
 
   // Add drag and drop handlers
   const fileUpload = document.querySelector('.file-upload');
@@ -1423,6 +1812,27 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
+
+  // Add event listeners for category checkboxes to remove error when selected
+  document.querySelectorAll('input[name="tags"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        const categoriesContainer = document.querySelector('.tags-container');
+        categoriesContainer.classList.remove('error');
+        
+        // Remove any existing error message
+        const existingError = categoriesContainer.nextElementSibling;
+        if (existingError && existingError.style.color === '#ef4444') {
+          existingError.remove();
+        }
+      }
+      
+      // Check if categories need to be validated again
+      if (document.querySelectorAll('input[name="tags"]:checked').length === 0) {
+        validateCategories();
+      }
+    });
+  });
 });
 
 // Form validation function
@@ -1442,19 +1852,15 @@ function validateForm() {
   });
   console.log('Fields to check:', fieldsToCheck);
 
-  // Check required fields (excluding email and product options)
-  {% comment %} fieldsToCheck.forEach(field => {
-    console.log('Checking field:', field.type, field.value);
-    if (!field.value.trim()) {
-      console.log('Field is empty:', field.type);
-      isValid = false;
-      field.classList.add('error');
-      const label = field.previousElementSibling?.textContent || field.getAttribute('placeholder') || 'This field';
-      missingFields.push(label.replace('*', '').trim());
-    } else {
-      field.classList.remove('error');
-    }
-  }); {% endcomment %}
+  // Check category selection
+  const categoryCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
+  if (categoryCheckboxes.length === 0) {
+    console.log('No categories selected');
+    isValid = false;
+    const categoriesContainer = document.querySelector('.tags-container');
+    categoriesContainer.classList.add('error');
+    missingFields.push('Categories (at least one required)');
+  }
 
   // Validate email format separately
   const emailField = document.querySelector('input[type="email"][required]');
@@ -1479,7 +1885,7 @@ function validateForm() {
     }
   }
 
-  // Validate product selection and options separately
+  // Validate product selection
   if (!selectedProduct) {
     console.log('No product selected');
     isValid = false;
@@ -1487,13 +1893,15 @@ function validateForm() {
     productSearch.classList.add('error');
     missingFields.push('Product selection');
   }
-  {% comment %} } else if (Object.keys(selectedVariants).length !== selectedProduct.options.length) {
-    console.log('Not all options are selected');
+
+  // Validate image upload
+  if (uploadedImages.length === 0) {
+    console.log('No images uploaded');
     isValid = false;
-    const variantSelection = document.getElementById('variant-selection');
-    variantSelection.classList.add('error');
-    missingFields.push('Product options');
-  } {% endcomment %}
+    const fileUpload = document.querySelector('.file-upload');
+    fileUpload.classList.add('error');
+    missingFields.push('Project images');
+  }
 
   console.log('Missing fields:', missingFields);
   console.log('Form is valid:', isValid);
@@ -1540,6 +1948,13 @@ function prepareFormData(images) {
   // Get all form fields
   const formFields = document.querySelectorAll('.form-input');
   
+  // Get rich text editor contents from hidden inputs
+  const projectDetails = document.getElementById('project-details-input').value;
+  
+  // Get selected categories from checkboxes
+  const categoryCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
+  const categories = Array.from(categoryCheckboxes).map(checkbox => checkbox.value);
+  
   // Create form data object matching the required format
   const formData = {
     firstName: formFields[0].value, // First name input
@@ -1548,8 +1963,10 @@ function prepareFormData(images) {
     projectName: formFields[3].value, // Project name input
     patternName: formFields[4].value, // Pattern name input
     designerName: formFields[5].value, // Designer name input
+    projectDetails: projectDetails,
+    categories: categories,
     patternLink: formFields[6].value,  // Pattern link input
-    shop:storeDomain,
+    shop: storeDomain,
     product: {
       shopifyId: selectedProduct.id,
       title: selectedProduct.title,
@@ -1616,6 +2033,15 @@ async function handleSubmit(event) {
   }
   console.log('validateForm', validateForm());
 
+  // Disable the submit button at the beginning
+  const submitButton = document.querySelector('.button.submit');
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'Submitting...';
+    submitButton.style.opacity = '0.7';
+    submitButton.style.cursor = 'not-allowed';
+  }
+
   try {
     const imageUrls = await uploadImages();
     console.log('Upload successful:', imageUrls);
@@ -1624,25 +2050,44 @@ async function handleSubmit(event) {
     const fileUploadHint = document.querySelector('.file-upload-hint');
     fileUploadHint.textContent = 'Failed to upload images. Please try again.';
     fileUploadHint.style.color = '#ef4444';
+    
+    // Re-enable the button on error
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Submit';
+      submitButton.style.opacity = '1';
+      submitButton.style.cursor = 'pointer';
+    }
     return;
   }
   const images = uploadedImageUrls.map(url => ({
     url: url,
     alt: `${url.split('/').pop()}`
   }));
-
-  const formData = prepareFormData(images);
-  
-  // Get the submit button correctly
-  const submitButton = event.target.closest('.button-group').querySelector('.submit');
-  if (submitButton) {
-    submitButton.disabled = true;
-    submitButton.textContent = 'Submitting...';
+  let formData;
+  try {
+    formData = prepareFormData(images);
+  } catch (error) {
+    console.error('Form data preparation error:', error);
+    const fileUploadHint = document.querySelector('.file-upload-hint');
+    fileUploadHint.textContent = 'Failed to upload images. Please try again.';
+    fileUploadHint.style.color = '#ef4444';
+    // Re-enable the button on error
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Submit';
+      submitButton.style.opacity = '1';
+      submitButton.style.cursor = 'pointer';
+    }
+    return;
   }
 
   try {
     const response = await fetch(`${API_PATH}/api/submissions`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(formData)
     });
 
@@ -1667,9 +2112,13 @@ async function handleSubmit(event) {
     errorMessage.className = 'error-message';
     errorMessage.textContent = `Error submitting form: ${error.message}`;
     document.querySelector('.form-card').prepend(errorMessage);
+    
+    // Re-enable the button on error
     if (submitButton) {
       submitButton.disabled = false;
       submitButton.textContent = 'Submit';
+      submitButton.style.opacity = '1';
+      submitButton.style.cursor = 'pointer';
     }
   }
 }

@@ -2,9 +2,25 @@ import { json } from "@remix-run/node";
 import  prisma  from "../db.server";
 import { authenticate } from "../shopify.server";
 
+// Define CORS headers for all methods
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400' // 24 hours
+};
+
 // GET /api/submissions - Get all submissions with optional filters
 export async function loader({ request }) {
   try {
+    // Handle OPTIONS request for CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
+    
     // current shop 
     const data = await authenticate.admin(request);
     console.log(data,'data')
@@ -53,22 +69,16 @@ export async function loader({ request }) {
       status,
       sortKey,
       sortDirection,
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error("Error fetching submissions:", error);
-    return json({ error: "Failed to fetch submissions" }, { status: 500 });
+    return json({ error: "Failed to fetch submissions" }, { status: 500, headers: corsHeaders });
   }
 }
 
 // POST /api/submissions - Create a new submission
 export async function action({ request }) {
   try {
-    // Add CORS headers
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, PUT, DELETE, OPTIONS'
-    };
-
     // Handle OPTIONS request for CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
@@ -109,20 +119,35 @@ export async function action({ request }) {
         return json({ error: "Invalid product data" }, { status: 400, headers: corsHeaders });
       }
 
+      console.log("Creating submission with data:", JSON.stringify({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        projectName: data.projectName,
+        shopifyId: data.product.shopifyId || data.product.id
+      }));
+
+      // Ensure product ID is handled correctly
+      const shopifyId = data.product.shopifyId || data.product.id || "";
+
+      // Ensure categories is always an array
+      const categories = Array.isArray(data.categories) ? data.categories : [];
+      
       // Create submission
       const submission = await prisma.projectSubmission.create({
         data: {
           firstName: data.firstName,
           lastName: data.lastName,
-          shop:data.shop,
+          shop: data.shop,
           email: data.email,
           projectName: data.projectName,
           patternName: data.patternName,
           designerName: data.designerName,
           patternLink: data.patternLink,
+          projectDetails: data.projectDetails,
+          categories: categories, // Use the categories array
           product: {
             create: {
-              shopifyId: data.product.id,
+              shopifyId: data.product.shopifyId,
               title: data.product.title,
               handle: data.product.handle,
               imageUrl: data.product.imageUrl,
@@ -149,6 +174,7 @@ export async function action({ request }) {
         },
       });
 
+      console.log("Submission created successfully:", submission.id);
       return json({ submission }, { status: 201, headers: corsHeaders });
     }
 
