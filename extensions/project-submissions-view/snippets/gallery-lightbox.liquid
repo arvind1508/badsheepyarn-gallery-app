@@ -1,0 +1,41 @@
+<!-- Lightbox Gallery - Updated for fullscreen without thumbnails -->
+<div class="gallery-lightbox" id="gallery-lightbox">
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close gallery">&times;</button>
+    <div class="image-counter" id="image-counter">6 / 23</div>
+    
+    <div class="lightbox-main">
+      <div class="lightbox-image-container">
+        <div class="loading-spinner" id="lightbox-spinner"></div>
+        <img src="" alt="" class="lightbox-image" id="lightbox-image" width="800" height="600">
+        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous image">&lt;</button>
+        <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next image">&gt;</button>
+        <button class="expand-image-btn" id="expand-image-btn" aria-label="View full size image">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="lightbox-details" id="lightbox-details">
+        <!-- Project details will be filled dynamically -->
+      </div>
+    </div>
+    
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+    <div class="lightbox-nav-controls">
+      <button class="project-nav-btn" id="prev-project-btn">Previous Project</button>
+      <button class="project-nav-btn" id="next-project-btn">Next Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add expanded view container -->
+<div class="expanded-view" id="expanded-view">
+  <div class="expanded-image-container">
+    <button class="expanded-close" id="expanded-close" aria-label="Close expanded view">&times;</button>
+    <img src="" alt="" class="expanded-image" id="expanded-image" width="1200" height="900">
+  </div>
+</div> 

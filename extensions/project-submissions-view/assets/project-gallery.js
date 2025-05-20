@@ -1,7 +1,214 @@
 // Project Gallery JavaScript
 
 // Global project data - use data passed from liquid template
-var projectData = window.projectData || {};
+var projectData = window.projectData || {
+  projects: [],
+  currentCategory: 'all',
+  currentSortOption: 'newest',
+  searchTerm: '',
+  batchSize: 9,
+  currentIndex: 0,
+  apiFiltering: true, // Flag to indicate we're using API-based filtering
+  shopDomain: '' // Added for shop domain
+};
+
+// API URL for public submissions
+const API_URL = 'https://badsheepyarn-gallery-app.vercel.app/api/public/submissions';
+
+// Fetch the projects from the API with filtering parameters
+async function fetchProjects(appendResults = false) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const galleryGrid = document.getElementById('gallery-grid');
+      if (!galleryGrid) {
+        resolve();
+        return;
+      }
+      
+      const shopDomain = document.querySelector('meta[name="shopify-shop-id"]')?.content || '';
+      let url = `${API_URL}?shop=${shopDomain}&perPage=100`;
+      
+      // Add search term if exists
+      if (projectData.searchTerm) {
+        url += `&search=${encodeURIComponent(projectData.searchTerm)}`;
+      }
+      
+      // Add category filter if not 'all'
+      if (projectData.currentCategory && projectData.currentCategory !== 'all') {
+        // Convert to uppercase for the API query
+        const categoryParam = projectData.currentCategory.toUpperCase();
+        url += `&category=${encodeURIComponent(categoryParam)}`;
+        console.log('Filtering by category:', categoryParam);
+      }
+      
+      // Add sorting parameter
+      if (projectData.currentSortOption) {
+        url += `&sort=${encodeURIComponent(projectData.currentSortOption)}`;
+      }
+      
+      // Add pagination if we're loading more
+      if (appendResults && projectData.currentIndex > 0) {
+        url += `&page=${Math.floor(projectData.currentIndex / projectData.batchSize) + 1}`;
+      }
+      
+      console.log('Fetching projects with URL:', url);
+      
+      // Show loading indicator if not appending
+      if (!appendResults && galleryGrid) {
+        galleryGrid.innerHTML = `
+          <div class="loading-indicator">
+            <div class="loading-spinner active"></div>
+            <p>Loading projects...</p>
+          </div>
+        `;
+      }
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects');
+      }
+      
+      const data = await response.json();
+      
+      if (!data.submissions || data.submissions.length === 0) {
+        // Show no projects message if empty
+        if (galleryGrid) {
+          // Add empty class to grid for styling
+          galleryGrid.classList.add('empty');
+          
+          galleryGrid.innerHTML = `
+            <div class="no-results">
+              <div class="no-results-icon">🧶</div>
+              <p>No projects found matching your criteria</p>
+              <p>Try adjusting your search terms or selecting a different category</p>
+              <button class="view-project-btn" onclick="window.location.href='${window.location.pathname}'">View All Projects</button>
+            </div>
+          `;
+        }
+        resolve(); // Resolve the promise even when no data
+        return;
+      }
+      
+      // We have data, remove empty class if it exists
+      if (galleryGrid) {
+        galleryGrid.classList.remove('empty');
+      }
+      
+      // Format the API data to match the expected format
+      const projects = (data.submissions || []).map(submission => {
+        // Process categories - either use the array or create from the string
+        let categories = [];
+        if (submission.categories && Array.isArray(submission.categories)) {
+          // Process categories - normalize case for display 
+          categories = submission.categories.map(cat => {
+            // For all uppercase categories (like "SOCKS"), convert to title case ("Socks")
+            if (cat === cat.toUpperCase()) {
+              return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+            }
+            return cat;
+          });
+        } else if (submission.category) {
+          // Split the category string by commas if it's a comma-separated list
+          categories = submission.category.split(',').map(cat => {
+            const trimmed = cat.trim();
+            // For all uppercase categories, convert to title case
+            if (trimmed === trimmed.toUpperCase()) {
+              return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+            }
+            return trimmed;
+          });
+        }
+        
+        return {
+          projectName: submission.projectName || 'Untitled Project',
+          firstName: submission.firstName || '',
+          lastName: submission.lastName || '',
+          nameDisplay: submission.nameDisplayPreference || 'anonymous',
+          socialMedia: submission.socialMediaHandle || '',
+          patternName: submission.patternName || '',
+          designerName: submission.designerName || '',
+          patternLink: submission.patternLink || '',
+          displayName: submission.displayName || '',
+          // Use the processed categories array
+          tags: categories.length > 0 ? categories : ['Other'],
+          images: submission.images.map(img => img.url) || [],
+          product: {
+            title: submission.product?.title || 'Product',
+            imageUrl: submission.product?.imageUrl || '',
+            options: submission.product?.selectedOption ? 
+              Object.entries(JSON.parse(submission.product.selectedOption)) : [],
+            url: `${window.location.origin}/products/${submission.product?.handle}`
+          },
+          dateAdded: submission.approvedAt || submission.createdAt,
+          likes: 0 // We don't have likes yet in the API
+        };
+      });
+      
+      // Update project data - append or replace
+      if (appendResults) {
+        projectData.projects = [...projectData.projects, ...projects];
+      } else {
+        projectData.projects = projects;
+        projectData.currentIndex = 0; // Reset pagination when filters change
+      }
+      
+      console.log('Projects loaded:', projects.length, 'Total:', projectData.projects.length);
+      
+      // Initialize the gallery
+      if (typeof renderProjects === 'function') {
+        // Small timeout to ensure DOM is ready
+        setTimeout(() => {
+          renderProjects();
+        }, 100);
+      }
+      
+      // Update load more button visibility
+      updateLoadMoreButton(data.total, projectData.projects.length);
+      
+      // Resolve the promise when done
+      resolve();
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      // Show error message in gallery
+      const galleryGrid = document.getElementById('gallery-grid');
+      if (galleryGrid) {
+        galleryGrid.classList.add('empty');
+        
+        galleryGrid.innerHTML = `
+          <div class="no-results">
+            <div class="no-results-icon">⚠️</div>
+            <p>Failed to load projects</p>
+            <p>Please try again later or contact support if the problem persists</p>
+            <button class="view-project-btn" onclick="window.location.reload()">Try Again</button>
+          </div>
+        `;
+      }
+      // Reject the promise on error
+      reject(error);
+    }
+  });
+}
+
+// Helper function to update load more button visibility
+function updateLoadMoreButton(totalCount, loadedCount) {
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const loadLessBtn = document.getElementById('load-less-btn');
+  
+  if (!loadMoreBtn || !loadLessBtn) return;
+  
+  if (loadedCount >= totalCount) {
+    loadMoreBtn.classList.add('hidden');
+  } else {
+    loadMoreBtn.classList.remove('hidden');
+  }
+  
+  if (projectData.currentIndex > 0) {
+    loadLessBtn.classList.remove('hidden');
+  } else {
+    loadLessBtn.classList.add('hidden');
+  }
+}
 
 // Skeleton loading state - show before content loads
 function createSkeletonCards(count = 6) {
@@ -41,9 +248,9 @@ function createProjectCard(project, index) {
   }
   
   // If we have a single sample image, use product image as additional one for demo
-  if (project.images.length === 1 && project.product.imageUrl) {
-    project.images.push(project.product.imageUrl);
-  }
+    //   if (project.images.length === 1 && project.product.imageUrl) {
+    //     project.images.push(project.product.imageUrl);
+    //   }
   
   // Check if project has multiple images
   const hasMultipleImages = project.images.length > 1;
@@ -241,115 +448,279 @@ function sortProjects(projects, sortOption) {
   return sortedProjects;
 }
 
+// Function to fix scrolling in lightbox
+function fixLightboxScrolling() {
+  const lightbox = document.getElementById('gallery-lightbox');
+  const lightboxContent = document.querySelector('.lightbox-content');
+  const lightboxMain = document.querySelector('.lightbox-main');
+  const detailsContainer = document.querySelector('.lightbox-details');
+  
+  if (!lightbox || !lightboxContent || !lightboxMain || !detailsContainer) return;
+  
+  // Fix scrolling on mobile
+  function adjustScrolling() {
+    // Check if mobile
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+      // On mobile, main content area should scroll
+      lightboxMain.style.overflowY = 'auto';
+      // Adjust position to center of screen
+      lightboxContent.style.top = '50%';
+      lightboxContent.style.transform = 'translateY(-50%)';
+    } else {
+      // On desktop, details should scroll but main doesn't need to
+      lightboxMain.style.overflowY = 'hidden';
+      detailsContainer.style.overflowY = 'auto';
+    }
+  }
+  
+  // Fix iOS scrolling issues
+  function preventBodyScroll(event) {
+    if (lightbox.classList.contains('active')) {
+      event.preventDefault();
+    }
+  }
+  
+  // Run on lightbox open
+  function onLightboxOpen() {
+    if (lightbox.classList.contains('active')) {
+      adjustScrolling();
+      
+      // Set focus to ensure scrollable
+      setTimeout(() => {
+        detailsContainer.focus();
+      }, 100);
+    }
+  }
+  
+  // Watch for lightbox opening
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'class') {
+        onLightboxOpen();
+      }
+    });
+  });
+  
+  observer.observe(lightbox, { attributes: true });
+  
+  // Also handle resize events
+  window.addEventListener('resize', adjustScrolling);
+  
+  // Fix iOS scrolling
+  document.addEventListener('touchmove', preventBodyScroll, { passive: false });
+  
+  // Run once on init
+  adjustScrolling();
+}
+
+// Function to dynamically insert lightbox modal
+function insertLightboxModal() {
+  // Create a container for the lightbox HTML
+  const lightboxHTML = `
+    <div class="gallery-lightbox" id="gallery-lightbox">
+      <div class="lightbox-content">
+        <button class="lightbox-close" id="lightbox-close" aria-label="Close gallery">&times;</button>
+        <div class="image-counter" id="image-counter">6 / 23</div>
+        
+        <div class="lightbox-main">
+          <div class="lightbox-image-container">
+            <div class="loading-spinner" id="lightbox-spinner"></div>
+            <img src="" alt="" class="lightbox-image" id="lightbox-image" width="800" height="600">
+            <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous image">&lt;</button>
+            <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next image">&gt;</button>
+            <button class="expand-image-btn" id="expand-image-btn" aria-label="View full size image">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="lightbox-details" id="lightbox-details">
+            <!-- Project details will be filled dynamically -->
+          </div>
+        </div>
+        
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+        <div class="lightbox-nav-controls">
+          <button class="project-nav-btn" id="prev-project-btn">Previous Project</button>
+          <button class="project-nav-btn" id="next-project-btn">Next Project</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="expanded-view" id="expanded-view">
+      <div class="expanded-image-container">
+        <button class="expanded-close" id="expanded-close" aria-label="Close expanded view">&times;</button>
+        <img src="" alt="" class="expanded-image" id="expanded-image" width="1200" height="900">
+      </div>
+    </div>
+  `;
+
+  // Create a temporary container
+  const temp = document.createElement('div');
+  temp.innerHTML = lightboxHTML;
+
+  // Insert the lightbox just before the closing body tag
+  document.body.insertBefore(temp.firstElementChild, document.body.lastElementChild);
+  document.body.insertBefore(temp.lastElementChild, document.body.lastElementChild);
+}
+
 // Initialize the gallery when document is ready
 document.addEventListener('DOMContentLoaded', function() {
+  // Insert the lightbox modal first
+  insertLightboxModal();
+
   // Mark as not initialized to show skeleton first
   projectData.initialized = false;
   
   // Set the batch size from Shopify settings if available
   const batchSizeElement = document.getElementById('gallery-batch-size');
+  
+  // Update this to match the original but with safer access patterns
   if (batchSizeElement) {
-    projectData.batchSize = parseInt(batchSizeElement.value) || 9;
+    projectData.batchSize = parseInt(batchSizeElement.value || projectData.batchSize);
   }
   
-  // Setup category filters
-  const categoryButtons = document.querySelectorAll('.category-item');
-  categoryButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // Remove active class from all buttons
-      categoryButtons.forEach(btn => btn.classList.remove('active'));
-      
-      // Add active class to clicked button
-      this.classList.add('active');
-      
-      // Update current category and reset index
-      projectData.currentCategory = this.dataset.category;
-      projectData.currentIndex = 0;
-      
-      // Re-render projects
-      renderProjects();
-      
-      // Track the selected category for analytics (optional)
-      if (window.analytics && typeof window.analytics.track === 'function') {
-        window.analytics.track('Category Filter Changed', {
-          category: projectData.currentCategory
-        });
-      }
-    });
-  });
-  
-  // Setup sorting
-  const sortSelect = document.getElementById('sort-select');
-  if (sortSelect) {
-    // Set initial sort option from select
-    projectData.currentSortOption = sortSelect.value;
-    
-    // Listen for changes
-    sortSelect.addEventListener('change', function() {
-      projectData.currentSortOption = this.value;
-      renderProjects();
-    });
+  // Get default sort value from HTML if available
+  const defaultSortElement = document.getElementById('default-sort-option');
+  if (defaultSortElement) {
+    projectData.currentSortOption = defaultSortElement.value;
   }
   
-  // Setup search
-  const searchInput = document.getElementById('gallery-search');
-  const searchClear = document.getElementById('search-clear');
+  // Get shop domain from hidden field
+  const shopDomainElement = document.getElementById('shop-domain');
+  if (shopDomainElement) {
+    projectData.shopDomain = shopDomainElement.value;
+  }
   
-  if (searchInput) {
-    // Debounce search to avoid too many redraws
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-      clearTimeout(searchTimeout);
-      
-      searchTimeout = setTimeout(() => {
-        handleSearch(this.value.toLowerCase().trim());
-      }, 300);
-    });
-    
-    // Clear search
-    if (searchClear) {
-      searchClear.addEventListener('click', function() {
-        searchInput.value = '';
-        handleSearch('');
+  // Initialize event handlers if we're on the main gallery page
+  if (document.getElementById('gallery-grid')) {
+    // Search input handler
+    const searchInput = document.getElementById('gallery-search');
+    if (searchInput) {
+      // Add debounced search handler
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        
+        searchTimeout = setTimeout(() => {
+          projectData.searchTerm = this.value.toLowerCase().trim();
+          projectData.currentIndex = 0; // Reset pagination
+          fetchProjects(); // Re-fetch with the new search term
+        }, 300);
       });
     }
-  }
-  
-  // Setup load more/less functionality
-  const loadMoreBtn = document.getElementById('load-more-btn');
-  const loadLessBtn = document.getElementById('load-less-btn');
-  
-  if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', function() {
-      projectData.currentIndex += projectData.batchSize;
-      renderProjects();
-      
-      // Scroll to newly loaded projects
-      window.scrollBy({
-        top: 300,
-        behavior: 'smooth'
+    
+    // Clear search button
+    const searchClear = document.getElementById('search-clear');
+    if (searchClear && searchInput) {
+      searchClear.addEventListener('click', function() {
+        searchInput.value = '';
+        projectData.searchTerm = '';
+        projectData.currentIndex = 0; // Reset pagination
+        fetchProjects(); // Re-fetch with no search term
+      });
+    }
+    
+    // Category filter buttons
+    const categoryButtons = document.querySelectorAll('.category-item');
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent default behavior
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.category-item').forEach(btn => btn.classList.remove('active'));
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Add loading state to active button
+        this.classList.add('loading');
+        
+        // Update current category
+        projectData.currentCategory = this.dataset.category;
+        
+        // Refetch with the new category
+        fetchProjects().then(() => {
+          // Remove loading state when done
+          this.classList.remove('loading');
+        }).catch(() => {
+          // Remove loading state even if there's an error
+          this.classList.remove('loading');
+        });
       });
     });
-  }
-  
-  if (loadLessBtn) {
-    loadLessBtn.addEventListener('click', function() {
-      projectData.currentIndex = 0;
-      renderProjects();
-      
-      // Scroll to top of gallery
-      document.querySelector('.project-gallery').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+    
+    // Sort select handler
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function() {
+        projectData.currentSortOption = this.value;
+        fetchProjects(); // Re-fetch with the new sort option
       });
-    });
+    }
+    
+    // Load more button
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', function() {
+        projectData.currentIndex += projectData.batchSize;
+        
+        if (projectData.apiFiltering) {
+          // Using API-based pagination
+          fetchProjects(true); // true = append results
+        } else {
+          // Using client-side pagination
+          renderProjects();
+        }
+        
+        // Scroll to newly loaded projects
+        window.scrollBy({
+          top: 300,
+          behavior: 'smooth'
+        });
+      });
+    }
+    
+    // Load less button
+    const loadLessBtn = document.getElementById('load-less-btn');
+    if (loadLessBtn) {
+      loadLessBtn.addEventListener('click', function() {
+        projectData.currentIndex = 0;
+        
+        if (projectData.apiFiltering) {
+          // Using API-based pagination
+          fetchProjects(false); // false = start fresh
+        } else {
+          // Using client-side pagination
+          renderProjects();
+        }
+        
+        // Scroll to top of gallery
+        document.querySelector('.project-gallery').scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
+    }
+    
+    // Set up lightbox if it exists
+    if (document.getElementById('gallery-lightbox')) {
+      setupLightbox();
+      fixLightboxScrolling();
+    }
+    
+    // Initial fetch of projects
+    fetchProjects();
   }
   
-  // Load initial project data
-  renderProjects();
-  
-  // Setup lightbox gallery
-  setupLightbox();
+  // If we're on the product gallery page, initialize that 
+  // Simply check if the product-gallery.js script is included
+  // No need to call fetchProductProjects here
 });
 
 // Handle search functionality
@@ -707,10 +1078,10 @@ function setupLightbox() {
     
     // If we have multiple sample images for a project, simulate it here
     // This is just for demonstration - in a real scenario, projects would have multiple images
-    if (project.images.length === 1 && project.product.imageUrl) {
-      // Add product image as a second image for demonstration
-      project.images.push(project.product.imageUrl);
-    }
+    // if (project.images.length === 1 && project.product.imageUrl) {
+    //   // Add product image as a second image for demonstration
+    //   project.images.push(project.product.imageUrl);
+    // }
     
     // Ensure image index is valid
     imageIndex = (imageIndex + project.images.length) % project.images.length;

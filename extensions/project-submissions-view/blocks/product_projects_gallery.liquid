@@ -1,0 +1,538 @@
+<style>
+  /* Font imports */
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+  /* Base font settings */
+  :root {
+    --font-primary: 'Montserrat', sans-serif;
+    --color-primary: #111827;
+    --color-secondary: #6b7280;
+    --color-background: #ffffff;
+    --color-hover: rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-gallery {
+    font-family: var(--font-primary);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+
+  .gallery-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .gallery-title {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .gallery-description {
+    font-family: var(--font-primary);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--color-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Gallery masonry layout */
+  .masonry-grid {
+    column-count: 3;
+    column-gap: 10px;
+    min-height: 200px;
+    position: relative;
+  }
+
+  .masonry-grid.empty {
+    display: block;
+    height: auto;
+  }
+
+  .masonry-grid-item {
+    break-inside: avoid;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  /* Project card styling */
+  .project-card {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    display: block;
+  }
+
+  .project-image {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    display: block;
+  }
+
+  .project-image img {
+    width: 100%;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .project-card:hover .project-image img {
+    transform: scale(1.05);
+  }
+
+  /* Skeleton loading styles */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .skeleton-item {
+    display: block;
+    width: 100%;
+  }
+
+  .project-card.skeleton {
+    background: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .skeleton-image {
+    width: 100%;
+    height: 260px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  .skeleton-content {
+    padding: 1rem;
+    background: #fff;
+  }
+
+  .skeleton-title {
+    width: 80%;
+    height: 20px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 4px;
+  }
+
+  .skeleton-meta {
+    width: 60%;
+    height: 15px;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 4px;
+  }
+
+  /* Permanent info overlay styling */
+  .project-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px;
+  }
+
+  .project-info-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+
+  .project-info-creator {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  
+  .project-info-tags {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  
+  .project-info-tag {
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+
+  /* Hover overlay styling */
+  .project-content {
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.3));
+    z-index: 2;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    max-height: 85%;
+    overflow-y: auto;
+  }
+
+  .project-card:hover .project-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .project-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .project-meta {
+    font-size: 0.9rem;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  }
+
+  .project-tags {
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2rem;
+  }
+
+  .project-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.15rem 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    color: white;
+  }
+
+  .view-project-btn {
+    display: inline-block;
+    background-color: #0066cc;
+    color: white;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .view-project-btn:hover {
+    background-color: #0052a3;
+    transform: translateY(-2px);
+  }
+
+  /* Submit Project Button */
+  .submit-project-wrapper {
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .submit-project-btn {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: white;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .submit-project-btn:hover {
+    background-color: #000000;
+    transform: translateY(-2px);
+  }
+
+  /* Responsive styles */
+  @media (min-width: 992px) {
+    .masonry-grid {
+      column-count: 3;
+    }
+  }
+  
+  @media (max-width: 991px) {
+    .masonry-grid {
+      column-count: 3;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .masonry-grid {
+      column-count: 2;
+    }
+    
+    .gallery-title {
+      font-size: 1.8rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .masonry-grid {
+      column-count: 1;
+    }
+    
+    .gallery-title {
+      font-size: 1.5rem;
+    }
+    
+    .gallery-description {
+      font-size: 1rem;
+    }
+  }
+
+  /* Load More Button */
+  .load-more-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 2rem 0;
+  }
+  
+  .load-more-btn {
+    display: inline-block;
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--color-primary);
+    cursor: pointer;
+  }
+  
+  .load-more-btn:hover {
+    background-color: var(--color-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .load-more-btn.hidden {
+    display: none;
+  }
+
+  /* No results styles */
+  .no-results {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--color-secondary);
+    font-size: 1.1rem;
+    margin: 2rem auto;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    max-width: 500px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+  }
+  
+  .no-results p {
+    margin: 0.5rem 0;
+  }
+  
+  .no-results p:first-child {
+    font-weight: 500;
+    font-size: 1.2rem;
+    color: var(--color-primary);
+  }
+  
+  .no-results-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+  }
+  
+  /* Loading spinner styles */
+  .loading-spinner {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #0066cc;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-spinner.active {
+    display: inline-block;
+  }
+  
+  /* Loading indicator styles */
+  .loading-indicator {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--color-secondary);
+    margin: 2rem auto;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
+<div class="product-gallery">
+  <div class="gallery-header">
+    <h2 class="gallery-title">{{ block.settings.title | escape }}</h2>
+    <p class="gallery-description">{{ block.settings.description | escape }}</p>
+  </div>
+  
+  {% if block.settings.show_submit_button %}
+  <div class="submit-project-wrapper">
+    <a href="{{ block.settings.submit_button_link }}" class="submit-project-btn">{{ block.settings.submit_button_text | escape }}</a>
+  </div>
+  {% endif %}
+  
+  <div id="product-gallery-grid" class="masonry-grid">
+    <!-- Projects will be loaded here dynamically -->
+  </div>
+  
+  {% if block.settings.enable_load_more %}
+  <div class="load-more-container" id="load-more-container">
+    <button id="load-more-btn" class="load-more-btn">{{ block.settings.load_more_text | default: 'Load More Projects' }}</button>
+  </div>
+  {% endif %}
+  
+  {% if block.settings.show_submit_button_bottom %}
+  <div class="submit-project-wrapper">
+    <a href="{{ block.settings.submit_button_link }}" class="submit-project-btn">{{ block.settings.submit_button_text | escape }}</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Add hidden input for batch size to be accessed by JavaScript -->
+<input type="hidden" id="gallery-batch-size" value="{{ block.settings.batch_size | default: 6 }}">
+<input type="hidden" id="current-product-handle" value="{{ product.handle }}">
+
+<!-- Load product gallery JavaScript file -->
+<script type="text/javascript" src="{{ 'product-gallery.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Product Projects Gallery",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Customer Projects"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Gallery Description",
+      "default": "See what others have made with this yarn"
+    },
+    {
+      "type": "header",
+      "content": "Submit Button Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_submit_button",
+      "label": "Show Submit Button at Top",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_submit_button_bottom",
+      "label": "Show Submit Button at Bottom",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "submit_button_text",
+      "label": "Submit Button Text",
+      "default": "Share Your Project"
+    },
+    {
+      "type": "url",
+      "id": "submit_button_link",
+      "label": "Submit Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Display Options"
+    },
+    {
+      "type": "range",
+      "id": "batch_size",
+      "min": 3,
+      "max": 12,
+      "step": 3,
+      "label": "Projects Per Page",
+      "info": "Number of projects to show before 'Load More' button",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_load_more",
+      "label": "Enable Load More",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "load_more_text",
+      "label": "Load More Text",
+      "default": "Load More Projects"
+    }
+  ]
+}
+{% endschema %} 
